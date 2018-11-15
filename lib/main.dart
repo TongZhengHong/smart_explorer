@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/splash_screen.dart';
+import 'package:smart_explorer/subject_map.dart';
 
 void main() => runApp(new Splash());
 

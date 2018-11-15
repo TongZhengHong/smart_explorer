@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 double screenWidth;
 
-List<double> positions = [235.0, 162.0, 86.0, 155.0, 115.0, 320.0, 271.0, 30.0, 103.0, 124.0];
+List<double> positions = [235.0, 162.0, 86.0, 155.0, 115.0, 300.0, 271.0, 30.0, 103.0, 180.0];
 
 class SubjectMap extends StatefulWidget {
   @override
@@ -12,11 +12,13 @@ class SubjectMap extends StatefulWidget {
 }
 
 class SubjectMapState extends State<SubjectMap> {
+  ScrollController _scroll = new ScrollController();
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     return new Scaffold(
       body: new ListView.builder(
+        controller: _scroll,
         itemCount: positions.length,
         itemBuilder: (context, i) {
           double paddingTop = 0.0;
@@ -32,12 +34,11 @@ class SubjectMapState extends State<SubjectMap> {
           return new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _buildCheckPoint(false, (positions[i] + 2 * paddingTop), paddingTop),
-              _buildCheckPoint(false, (positions[i] + paddingTop), paddingTop),
-              _buildCheckPoint(true, positions[i], 0),
-              _buildCheckPoint(false, (positions[i] + paddingBottom), paddingBottom),
-              _buildCheckPoint(false, (positions[i] + 2 * paddingBottom), paddingBottom),
-              //new Text("dafa")
+              _buildCheckPoint(false, (positions[i] + 2 * paddingTop), paddingTop, i),
+              _buildCheckPoint(false, (positions[i] + paddingTop), paddingTop, i),
+              _buildCheckPoint(true, positions[i], 0, i),
+              _buildCheckPoint(false, (positions[i] + paddingBottom), paddingBottom, i),
+              _buildCheckPoint(false, (positions[i] + 2 * paddingBottom), paddingBottom, i),
             ],
           );
         },
@@ -45,34 +46,48 @@ class SubjectMapState extends State<SubjectMap> {
     );
   }
 
-  Widget _buildCheckPoint(bool mainCheck, double paddingLeft, double check) {
+  Widget _buildCheckPoint(bool mainCheck, double paddingLeft, double check, int position) {
     if (!mainCheck && check == 0) {
-      return new Container();
+      return new Container(
+        height: 36.0,
+      );
     } else {
       double _checkpointSize = 48.0;
       double _pathDotHeight = 36.0;
       return new Container(
         height: mainCheck ? _checkpointSize : _pathDotHeight,
-        child: mainCheck ? _checkPoint : _pathDot,
-        padding: mainCheck ? EdgeInsets.only(left: paddingLeft) : EdgeInsets.only(left: paddingLeft + _checkpointSize/2),
+        child: mainCheck ? _drawCircle(true, _checkpointSize, position) : _drawCircle(false, 4.0, position),
+        padding: mainCheck ? EdgeInsets.only(left: paddingLeft) : EdgeInsets.only(left: paddingLeft + _checkpointSize/2, top: 16.0, bottom: 16.0),
       );
     }
   }
 
-  Widget _checkPoint = new FloatingActionButton(
-    onPressed: () {
-      print("Checkpoint clicked!");
-    },
-    backgroundColor: Colors.redAccent,
-  );
-
-  Widget _pathDot = new Container(
-    padding: EdgeInsets.symmetric(vertical: 36.0),
-    width: 4.0,
-    height: 4.0,
-    decoration: new BoxDecoration(
-      shape: BoxShape.circle,
-      color: Colors.black,
-    )
-  );
+  Widget _drawCircle(bool mainCheck, double diameter, int position){
+    return new Container(
+      height: diameter,
+      width: diameter,
+      child: new Material(
+        borderRadius: BorderRadius.circular(diameter/2),
+        color: mainCheck ? Colors.red : Colors.black,
+        child: !mainCheck ? null : new InkWell(
+          borderRadius: BorderRadius.circular(diameter/2),
+          onTap: () {
+            _scroll.animateTo(position * 120.0 + 36.0, duration: new Duration(milliseconds: 500), curve: Curves.ease);
+            showModalBottomSheet(
+              context: context,
+              builder: (builder) {
+                return new Container(
+                  height: 240.0,
+                  color: Colors.lightGreenAccent,
+                  child: new Center(
+                    child: new Text("Hello"),
+                  ),
+                );
+              }
+            );
+          },
+        ),
+      ),
+    );
+  }
 }
