@@ -1,33 +1,43 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/main.dart';
+import 'package:smart_explorer/subject_map.dart';
 
-const timeout = const Duration(seconds: 3);
+const timeout = const Duration(seconds: 5);
 
 class Splash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      home: new MyHome()
+    );
+  }
+}
+
+class MyHome extends StatelessWidget {
   var _context;
 
-  Splash() {
+  MyHome() {
     Timer(timeout, () {
-      Navigator.of(_context).push(new MaterialPageRoute(builder: (context) {
-        return new MyApp();
-      }));
+      Route route = MaterialPageRoute(builder: (context) => SubjectMap());
+      Navigator.pushReplacement(_context, route);
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    _context = context;
-    return new Center(
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Image.network(
-              "https://cdn1.iconfinder.com/data/icons/app-5/48/85-512.png"),
-          new Text("Smart Explorer"),
-          new Text("Explore the endless possibilies"),
-        ],
-      ),
-    );
-  }
+    Widget build(BuildContext context) {
+      _context = context;
+      return new Scaffold(
+        body: new Center(
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new Text("Smart Explorer"),
+              new Text("Explore the endless possibilities!"),
+              new CircularProgressIndicator()
+            ],
+          )
+        ),
+      );
+    }
 }

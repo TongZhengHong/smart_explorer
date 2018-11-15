@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/splash_screen.dart';
 
-void main() {
-  runApp(new Splash());
-}
+void main() => runApp(new Splash());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Flutter D',
+      title: 'Smart Explorer App',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
