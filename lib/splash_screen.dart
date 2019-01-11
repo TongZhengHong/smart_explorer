@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/main.dart';
 import 'package:smart_explorer/subject_map.dart';
+import 'package:smart_explorer/login_page.dart';
 
 const timeout = const Duration(seconds: 5);
 
@@ -19,7 +20,7 @@ class MyHome extends StatelessWidget {
 
   MyHome() {
     Timer(timeout, () {
-      Route route = MaterialPageRoute(builder: (context) => SubjectMap());
+      Route route = MaterialPageRoute(builder: (context) => LoginPage());
       Navigator.pushReplacement(_context, route);
     });
   }
