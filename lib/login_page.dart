@@ -54,17 +54,43 @@ class LoginPageState extends State<LoginPage> {
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.lightBlueAccent))),
     );
-
+void _showDialog(String str) {
+    // flutter defined function
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(str),
+          content: new Text(""),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
     login(String username1, String password1) async {
-      String url = 'https://tinypingu.infocommsociety.com/index';
+      String url = 'https://tinypingu.infocommsociety.com/login2';
       await http.post(url, body: {
         "username": username1,
         "password": password1
       }).then((dynamic response){
         if (response.statusCode == 200) {
-          print("yay");
+          _showDialog("Successful Login");
+          print("Successful Login");
         }
-        else {
+        else if(response.statusCode==400){
+          _showDialog("Wrong Password");
+          print("Wrong Password");
+        }else{
+          _showDialog(":(");
           print(":(");
         }
       });
