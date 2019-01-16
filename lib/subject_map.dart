@@ -36,7 +36,7 @@ class SubjectMapState extends State<SubjectMap> {
             children: <Widget>[
               _buildCheckPoint(false, (positions[i] + 2 * paddingTop), paddingTop, i),
               _buildCheckPoint(false, (positions[i] + paddingTop), paddingTop, i),
-              _buildCheckPoint(true, positions[i], 0, i),
+              _buildCheckPoint(true, positions[i], 0.0, i),
               _buildCheckPoint(false, (positions[i] + paddingBottom), paddingBottom, i),
               _buildCheckPoint(false, (positions[i] + 2 * paddingBottom), paddingBottom, i),
             ],

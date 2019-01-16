@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   static String tag = "login_page_avatar";
@@ -54,6 +55,21 @@ class LoginPageState extends State<LoginPage> {
               borderSide: BorderSide(color: Colors.lightBlueAccent))),
     );
 
+    login(String username1, String password1) async {
+      String url = 'https://tinypingu.infocommsociety.com/index';
+      await http.post(url, body: {
+        "username": username1,
+        "password": password1
+      }).then((dynamic response){
+        if (response.statusCode == 200) {
+          print("yay");
+        }
+        else {
+          print(":(");
+        }
+      });
+    }
+
     final Widget button = new Container(
         height: 48.0,
         child: new Material(
@@ -63,6 +79,7 @@ class LoginPageState extends State<LoginPage> {
           elevation: 4.0,
           child: new InkWell(
             onTap: () {
+              login(_usernameControl.text, _passwordControl.text);
               print("Login clicked!");
             },
             borderRadius: BorderRadius.circular(24.0),
