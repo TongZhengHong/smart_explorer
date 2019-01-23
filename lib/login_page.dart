@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:smart_explorer/subject_map.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = "login_page_avatar";
@@ -77,18 +78,25 @@ void _showDialog(String str) {
     );
   }
     login(String username1, String password1) async {
+      if(username1==""){
+        _showDialog("Username cannot be empty");
+        print("Username cannot be empty");
+        return;
+      }
       String url = 'https://tinypingu.infocommsociety.com/login2';
       await http.post(url, body: {
         "username": username1,
         "password": password1
       }).then((dynamic response){
         if (response.statusCode == 200) {
-          _showDialog("Successful Login");
+          //_showDialog("Successful Login");
           print("Successful Login");
+          Route route = MaterialPageRoute(builder: (context) => SubjectMap());
+          Navigator.pushReplacement(context, route);
         }
         else if(response.statusCode==400){
-          _showDialog("Wrong Password");
-          print("Wrong Password");
+          _showDialog("Wrong Username or Password");
+          print("Wrong Username or Password");
         }else{
           _showDialog(":(");
           print(":(");
