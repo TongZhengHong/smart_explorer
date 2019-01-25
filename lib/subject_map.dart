@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_explorer/global.dart' as global;
 
 double screenWidth;
 
@@ -13,10 +14,15 @@ class SubjectMap extends StatefulWidget {
 
 class SubjectMapState extends State<SubjectMap> {
   ScrollController _scroll = new ScrollController();
+  int idx = global.subindex;
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     return new Scaffold(
+      appBar: AppBar(
+        
+        title: Text(global.subjects[idx]),
+      ),
       body: new ListView.builder(
         controller: _scroll,
         itemCount: positions.length,

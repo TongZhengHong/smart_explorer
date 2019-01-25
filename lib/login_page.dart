@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_explorer/subject_map.dart';
-
+import 'package:smart_explorer/main_page.dart';
+import 'package:smart_explorer/global.dart' as global;
+import 'dart:convert';
 class LoginPage extends StatefulWidget {
   static String tag = "login_page_avatar";
   @override
   State<StatefulWidget> createState() {
     return new LoginPageState();
+  }
+}
+class Post {
+  final String name;
+  final String email;
+
+  Post({this.name, this.email});
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      name: json['Name'],
+      email: json['Email'],
+    );
   }
 }
 
@@ -40,7 +55,7 @@ class LoginPageState extends State<LoginPage> {
     final Widget username = TextField(
       controller: _usernameControl,
       decoration: InputDecoration(
-          labelText: "Username",
+          labelText: "Student ID",
           labelStyle: new TextStyle(fontFamily: "Nunito", color: Colors.grey),
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.lightBlueAccent))),
@@ -91,7 +106,14 @@ void _showDialog(String str) {
         if (response.statusCode == 200) {
           //_showDialog("Successful Login");
           print("Successful Login");
-          Route route = MaterialPageRoute(builder: (context) => SubjectMap());
+          global.studentID = username1;
+          String rawCookie = response.headers['set-cookie'];
+          int index = rawCookie.indexOf(';');
+          global.cookie = (index == -1) ? rawCookie : rawCookie.substring(0, index);
+          Post temp = new Post.fromJson(json.decode(response.body));
+          global.studentName = temp.name;
+          global.studentEmail = temp.email;
+          Route route = MaterialPageRoute(builder: (context) => MainPage());
           Navigator.pushReplacement(context, route);
         }
         else if(response.statusCode==400){
