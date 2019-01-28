@@ -11,35 +11,30 @@ const timeout = const Duration(seconds: 5);
 
 class MainPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState(){
+  State<StatefulWidget> createState() {
     return new MainPageState();
   }
 }
 
-void update(int index) async{
+void update(int index) async {
   String url = 'https://tinypingu.infocommsociety.com/subjectprogress';
   print(global.studentID);
-      await http.post(url, body: {
-        "ID": global.studentID
-      },headers: {
-        "cookie":global.cookie
-      }
-      ).then((dynamic response){
-        if (response.statusCode == 200) {
-          //_showDialog("Successful Login");
-          print("Successful Data Transfer");
-          Post temp = new Post.fromJson(json.decode(response.body));
-          global.overallProgress[index] = temp.overallProgress;
-          global.totalScore[index] = temp.tScore;
-          print(global.overallProgress[index]);
-          print(global.totalScore[index]);
-        }
-        else{
-          print(response.statusCode);
-          print(":(");
-        }
-      });
+  await http.post(url,
+      body: {"ID": global.studentID},
+      headers: {"cookie": global.cookie}).then((dynamic response) {
+    if (response.statusCode == 200) {
+      //_showDialog("Successful Login");
+      print("Successful Data Transfer");
+      Post temp = new Post.fromJson(json.decode(response.body));
+      global.overallProgress[index] = temp.overallProgress;
+      global.totalScore[index] = temp.tScore;
+    } else {
+      print(response.statusCode);
+      print(":(");
+    }
+  });
 }
+
 class Post {
   final int overallProgress;
   final int tScore;
@@ -53,6 +48,7 @@ class Post {
     );
   }
 }
+
 class MainPageState extends State<MainPage> {
   var _context;
 
@@ -64,54 +60,74 @@ class MainPageState extends State<MainPage> {
       child: Text(
         global.subjects[index],
         style: TextStyle(fontFamily: "Nunito", color: Colors.grey),
-      ),      
-    );    
-  }  
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     _context = context;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Smart Explorer"),
-      ),
       body: PageView(
-        onPageChanged: (index){
+        onPageChanged: (index) {
           global.subindex = index;
         },
         children: [
           _buildPage(index: 0),
           _buildPage(index: 1),
           _buildPage(index: 2),
-          _buildPage(index: 3),          
-        ],          
+          _buildPage(index: 3),
+        ],
       ),
-      floatingActionButtonLocation: 
-        FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        child: Text(
-          'Explore!',
-          style: TextStyle(fontFamily: "Nunito", color: Colors.white),                    
-        ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SubjectMap()),
-          );
-        },
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: new Container(
+          height: 48.0,
+          width: 180.0,
+          child: new Material(
+            borderRadius: BorderRadius.circular(24.0),
+            shadowColor: Colors.lightBlueAccent,
+            color: Colors.lightBlue,
+            elevation: 4.0,
+            child: new InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SubjectMap()),
+                );
+              },
+              borderRadius: BorderRadius.circular(24.0),
+              child: new Center(
+                child: new Center(
+                  child: new Text(
+                    "Explore!",
+                    style: new TextStyle(
+                      fontFamily: "Nunito",
+                      fontSize: 16.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )),
       bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
         notchMargin: 4.0,
         child: new Row(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            IconButton(icon: Icon(Icons.menu), onPressed: () {},),
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () {
-                
+            PopupMenuButton<Choice>(
+              icon: new Icon(Icons.more_vert),
+              onSelected: _select,
+              //      double height = -BottomAppBar.preferredSize.height;
+              offset: Offset(0, -120),
+              itemBuilder: (BuildContext context) {
+                return choices.map((Choice choice) {
+                  return PopupMenuItem<Choice>(
+                    value: choice,
+                    child: Text(choice.title),
+                  );
+                }).toList();
               },
             ),
           ],
@@ -134,7 +150,8 @@ class MainPageState extends State<MainPage> {
                 print("hi");
                 global.studentID = "";
                 global.cookie = "";
-                Route route = MaterialPageRoute(builder: (context) => LoginPage());
+                Route route =
+                    MaterialPageRoute(builder: (context) => LoginPage());
                 Navigator.pushReplacement(context, route);
               },
             ),
@@ -143,4 +160,28 @@ class MainPageState extends State<MainPage> {
       ),
     );
   }
+}
+
+class Choice {
+  const Choice({this.title, this.icon});
+
+  final String title;
+  final IconData icon;
+}
+
+const List<Choice> choices = const <Choice>[
+  const Choice(title: 'Settings', icon: Icons.directions_car),
+  const Choice(title: 'Log out', icon: Icons.directions_bike),
+];
+
+void _select(Choice choice) {
+  // Causes the app to rebuild with the new _selectedChoice.
+  print(choice.title);
+  if (choice.title == "Log out") {
+    // global.studentID = "";
+    // global.cookie = "";
+    // Route route = MaterialPageRoute(builder: (context) => LoginPage());
+    // Navigator.pushReplacement(context, route);
+  }
+  return;
 }
