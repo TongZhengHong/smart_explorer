@@ -4,6 +4,7 @@ import 'package:smart_explorer/main.dart';
 import 'package:smart_explorer/subject_map.dart';
 import 'package:smart_explorer/login_page.dart';
 import 'dart:convert';
+
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
 
@@ -119,7 +120,6 @@ class MainPageState extends State<MainPage> {
             PopupMenuButton<Choice>(
               icon: new Icon(Icons.more_vert),
               onSelected: _select,
-              //      double height = -BottomAppBar.preferredSize.height;
               offset: Offset(0, -120),
               itemBuilder: (BuildContext context) {
                 return choices.map((Choice choice) {
@@ -170,18 +170,18 @@ class Choice {
 }
 
 const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Settings', icon: Icons.directions_car),
-  const Choice(title: 'Log out', icon: Icons.directions_bike),
+  const Choice(title: 'Settings', icon: Icons.settings),
+  const Choice(title: 'Log out', icon: Icons.power_settings_new),
 ];
 
 void _select(Choice choice) {
   // Causes the app to rebuild with the new _selectedChoice.
   print(choice.title);
-  if (choice.title == "Log out") {
-    // global.studentID = "";
-    // global.cookie = "";
-    // Route route = MaterialPageRoute(builder: (context) => LoginPage());
-    // Navigator.pushReplacement(context, route);
-  }
+  // if (choice.title == "Log out") {
+  //   global.studentID = "";
+  //   global.cookie = "";
+  //   Route route = MaterialPageRoute(builder: (context) => LoginPage());
+  //   Navigator.pushReplacement(context, route);
+  // }
   return;
 }

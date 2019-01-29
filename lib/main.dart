@@ -1,49 +1,48 @@
-import 'package:flutter/material.dart';
-import 'package:smart_explorer/splash_screen.dart';
-import 'package:smart_explorer/subject_map.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:smart_explorer/login_page.dart';
+
+const timeout = const Duration(seconds: 5);
+
+//!Run splash screen on load!
 void main() => runApp(new Splash());
 
-class MyApp extends StatelessWidget {
+class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Smart Explorer App',
-      theme: new ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: new MyHomePage(),
+      home: new MyHome()
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => new _MyHomePageState();
-}
+class MyHome extends StatelessWidget {
+  var _context;
 
-class _MyHomePageState extends State<MyHomePage> {
+  MyHome() {
+    Timer(timeout, () {
+      Route route = MaterialPageRoute(builder: (context) => LoginPage());
+      Navigator.pushReplacement(_context, route);
+    });
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Testing"),
-      ),
-      body: new Center(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Text(
-              'Testing',
-            ),
-          ],
+    Widget build(BuildContext context) {
+      _context = context;
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text("Smart Explorer"),
+              Padding(padding: EdgeInsets.all(12.0),),
+              Text("Explore the endless possibilities!"),
+              Padding(padding: EdgeInsets.all(12.0),),
+              CircularProgressIndicator()
+            ],
+          )
         ),
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: new Icon(Icons.add),
-      ), 
-    );
-  }
+      );
+    }
 }

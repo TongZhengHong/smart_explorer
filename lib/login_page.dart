@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:smart_explorer/subject_map.dart';
 import 'package:smart_explorer/main_page.dart';
 import 'package:smart_explorer/global.dart' as global;
 import 'dart:convert';
+
 class LoginPage extends StatefulWidget {
   static String tag = "login_page_avatar";
   @override
@@ -11,6 +11,7 @@ class LoginPage extends StatefulWidget {
     return new LoginPageState();
   }
 }
+
 class Post {
   final String name;
   final String email;
@@ -28,12 +29,7 @@ class Post {
 class LoginPageState extends State<LoginPage> {
   final _usernameControl = TextEditingController();
   final _passwordControl = TextEditingController();
-
-  final _nunitoTextWhite =
-      new TextStyle(color: Colors.white, fontFamily: 'Nunito', fontSize: 16.0);
-  final _nunitoTextBlack =
-      new TextStyle(color: Colors.black, fontFamily: 'Nunito', fontSize: 16.0);
-
+  
   @override
   void dispose() {
     _usernameControl.dispose();
@@ -58,7 +54,7 @@ class LoginPageState extends State<LoginPage> {
           labelText: "Student ID",
           labelStyle: new TextStyle(fontFamily: "Nunito", color: Colors.grey),
           focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.lightBlueAccent))),
+              borderSide: BorderSide(color: global.blue))),
     );
 
     final Widget password = TextField(
@@ -68,58 +64,58 @@ class LoginPageState extends State<LoginPage> {
           labelText: "Password",
           labelStyle: new TextStyle(fontFamily: "Nunito", color: Colors.grey),
           focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.lightBlueAccent))),
+              borderSide: BorderSide(color: global.blue))),
     );
-void _showDialog(String str) {
-    // flutter defined function
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: new Text(str),
-          content: new Text(""),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+    void _showDialog(String str) {
+      // flutter defined function
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return AlertDialog(
+            title: new Text(str),
+            content: new Text(""),
+            actions: <Widget>[
+              // usually buttons at the bottom of the dialog
+              new FlatButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     login(String username1, String password1) async {
-      if(username1==""){
+      if (username1 == "") {
         _showDialog("Username cannot be empty");
         print("Username cannot be empty");
         return;
       }
       String url = 'https://tinypingu.infocommsociety.com/login2';
-      await http.post(url, body: {
-        "username": username1,
-        "password": password1
-      }).then((dynamic response){
+      await http
+          .post(url, body: {"username": username1, "password": password1}).then(
+              (dynamic response) {
         if (response.statusCode == 200) {
           //_showDialog("Successful Login");
           print("Successful Login");
           global.studentID = username1;
           String rawCookie = response.headers['set-cookie'];
           int index = rawCookie.indexOf(';');
-          global.cookie = (index == -1) ? rawCookie : rawCookie.substring(0, index);
+          global.cookie =
+              (index == -1) ? rawCookie : rawCookie.substring(0, index);
           Post temp = new Post.fromJson(json.decode(response.body));
           global.studentName = temp.name;
           global.studentEmail = temp.email;
           Route route = MaterialPageRoute(builder: (context) => MainPage());
           Navigator.pushReplacement(context, route);
-        }
-        else if(response.statusCode==400){
+        } else if (response.statusCode == 400) {
           _showDialog("Wrong Username or Password");
           print("Wrong Username or Password");
-        }else{
+        } else {
           _showDialog(":(");
           print(":(");
         }
@@ -127,12 +123,17 @@ void _showDialog(String str) {
     }
 
     final Widget button = new Container(
-        height: 48.0,
-        child: new Material(
+        decoration: BoxDecoration(
+          gradient: global.blueButtonGradient,
           borderRadius: BorderRadius.circular(24.0),
-          shadowColor: Colors.lightBlueAccent,
-          color: Colors.lightBlue,
-          elevation: 4.0,
+          boxShadow: [
+            BoxShadow(
+                color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
+          ],
+        ),
+        height: 48.0,
+        child: Material(
+          color: Colors.transparent,
           child: new InkWell(
             onTap: () {
               login(_usernameControl.text, _passwordControl.text);
@@ -142,9 +143,10 @@ void _showDialog(String str) {
             child: new Center(
               child: new Center(
                 child: new Text(
-                  "Explore now!",
+                  "Login!",
                   style: new TextStyle(
                     fontFamily: "Nunito",
+                    fontWeight: FontWeight.bold,
                     fontSize: 16.0,
                     color: Colors.white,
                   ),
