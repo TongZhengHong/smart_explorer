@@ -18,10 +18,10 @@ class MyHome extends StatelessWidget {
   var _context;
 
   MyHome() {
-    // Timer(timeout, () {
-    //   Route route = MaterialPageRoute(builder: (context) => LoginPage());
-    //   Navigator.pushReplacement(_context, route);
-    // });
+    Timer(timeout, () {
+      Route route = MaterialPageRoute(builder: (context) => LoginPage());
+      Navigator.pushReplacement(_context, route);
+    });
   }
 
   @override
