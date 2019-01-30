@@ -101,31 +101,6 @@ class MainPageState extends State<MainPage> {
           ],
         ),
       ),
-      drawer: Drawer(
-        elevation: 20.0,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: Text(global.studentName),
-              accountEmail: Text(global.studentEmail),
-              decoration: BoxDecoration(color: Colors.blueAccent),
-            ),
-            ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('Logout'),
-              onTap: () {
-                print("hi");
-                global.studentID = "";
-                global.cookie = "";
-                Route route =
-                    MaterialPageRoute(builder: (context) => LoginPage());
-                Navigator.pushReplacement(context, route);
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
