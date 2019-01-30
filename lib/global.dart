@@ -11,7 +11,9 @@ List<int> totalScore = [0,0,0,0];
 String cookie = "";
 
 //! Parameters
-double nav_bar_height = 200;
+double phoneHeight = 0.0;
+double phoneWidth = 0.0;
+double navBarHeight = 200;
 
 //! Colours:
 Color blue = const Color(0xFF78B2FA);

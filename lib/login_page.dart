@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:smart_explorer/main_page.dart';
+import 'package:smart_explorer/main.dart';
 import 'package:smart_explorer/global.dart' as global;
 import 'dart:convert';
 
@@ -29,7 +29,7 @@ class Post {
 class LoginPageState extends State<LoginPage> {
   final _usernameControl = TextEditingController();
   final _passwordControl = TextEditingController();
-  
+
   @override
   void dispose() {
     _usernameControl.dispose();
@@ -51,20 +51,20 @@ class LoginPageState extends State<LoginPage> {
     final Widget username = TextField(
       controller: _usernameControl,
       decoration: InputDecoration(
+        border: OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
           labelText: "Student ID",
-          labelStyle: new TextStyle(fontFamily: "Nunito", color: Colors.grey),
-          focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: global.blue))),
+          labelStyle: TextStyle(fontFamily: "Nunito", color: global.blue),
+          ),
     );
 
     final Widget password = TextField(
       controller: _passwordControl,
       obscureText: true,
       decoration: InputDecoration(
+        fillColor: global.blue,
+          border: OutlineInputBorder(),
           labelText: "Password",
-          labelStyle: new TextStyle(fontFamily: "Nunito", color: Colors.grey),
-          focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: global.blue))),
+          labelStyle: new TextStyle(fontFamily: "Nunito", color: global.blue),)
     );
     void _showDialog(String str) {
       // flutter defined function
@@ -154,8 +154,7 @@ class LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        )
-      );
+        ));
 
     return new Scaffold(
       resizeToAvoidBottomPadding: true,
@@ -170,6 +169,9 @@ class LoginPageState extends State<LoginPage> {
               height: 16.0,
             ),
             username,
+            SizedBox(
+              height: 16.0,
+            ),
             password,
             SizedBox(
               height: 32.0,
