@@ -85,6 +85,7 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     _context = context;
     return Scaffold(
+      backgroundColor: global.backgroundWhite,
       body: PageView(
         onPageChanged: (index) {
           global.subindex = index;
@@ -98,7 +99,7 @@ class MainPageState extends State<MainPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: global.createGradientButton(
-          global.blueGradient, 48, 156, context, SubjectMap()),
+          global.blueGradient, 48, global.phoneWidth*0.5, context, SubjectMap(), "Explore!"),
       bottomNavigationBar: BottomAppBar(
         color: global.appBarLightBlue,
         child: Row(

@@ -74,7 +74,7 @@ class SubjectMapState extends State<SubjectMap> {
       width: diameter,
       child: new Material(
         borderRadius: BorderRadius.circular(diameter/2),
-        color: mainCheck ? Colors.red : Colors.black,
+        color: mainCheck ? global.blue : Colors.blueGrey,
         child: !mainCheck ? null : new InkWell(
           borderRadius: BorderRadius.circular(diameter/2),
           onTap: () {

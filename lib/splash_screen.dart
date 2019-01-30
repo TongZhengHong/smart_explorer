@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:smart_explorer/global.dart' as global;
 import 'package:smart_explorer/login_page.dart';
 
 const timeout = const Duration(seconds: 5);
@@ -17,22 +18,27 @@ class MyHome extends StatelessWidget {
   var _context;
 
   MyHome() {
-    Timer(timeout, () {
-      Route route = MaterialPageRoute(builder: (context) => LoginPage());
-      Navigator.pushReplacement(_context, route);
-    });
+    // Timer(timeout, () {
+    //   Route route = MaterialPageRoute(builder: (context) => LoginPage());
+    //   Navigator.pushReplacement(_context, route);
+    // });
   }
 
   @override
     Widget build(BuildContext context) {
       _context = context;
+      global.phoneHeight = MediaQuery.of(context).size.height;
+      global.phoneWidth = MediaQuery.of(context).size.width;
+
       return Scaffold(
+        backgroundColor: global.backgroundWhite,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("Study Studio", 
-                style: TextStyle(fontFamily: "Audiowide", fontSize: 36.0),
+              Text("A studious\nadventure!", 
+                style: TextStyle(fontFamily: "Audiowide", fontSize: 36.0,),
+                textAlign: TextAlign.center,
               ),
               Padding(padding: EdgeInsets.all(4.0),),
               Text("Explore the endless possibilities!", 

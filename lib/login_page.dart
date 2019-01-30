@@ -134,13 +134,13 @@ class LoginPageState extends State<LoginPage> {
     final Widget button = Container(
       decoration: BoxDecoration(
         gradient: global.blueButtonGradient,
-        borderRadius: BorderRadius.circular(24.0),
+        borderRadius: BorderRadius.circular(28.0),
         boxShadow: [
           BoxShadow(
               color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
         ],
       ),
-      height: 48.0,
+      height: 56.0,
       child: Material(
         color: Colors.transparent,
         child: new InkWell(
@@ -148,7 +148,7 @@ class LoginPageState extends State<LoginPage> {
             login(_usernameControl.text, _passwordControl.text);
             print("Login clicked!");
           },
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(28.0),
           child: new Center(
             child: new Center(
               child: new Text(
@@ -156,7 +156,7 @@ class LoginPageState extends State<LoginPage> {
                 style: new TextStyle(
                   fontFamily: "Nunito",
                   fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
+                  fontSize: 20.0,
                   color: Colors.white,
                 ),
               ),
@@ -168,7 +168,7 @@ class LoginPageState extends State<LoginPage> {
 
     return new Scaffold(
       resizeToAvoidBottomPadding: true,
-      backgroundColor: Colors.white,
+      backgroundColor: global.backgroundWhite,
       body: new Center(
         child: new ListView(
           shrinkWrap: true,
@@ -184,7 +184,7 @@ class LoginPageState extends State<LoginPage> {
             ),
             password,
             SizedBox(
-              height: 32.0,
+              height: 24.0,
             ),
             button,
           ],

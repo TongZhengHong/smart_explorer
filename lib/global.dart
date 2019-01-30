@@ -39,7 +39,7 @@ LinearGradient greenGradient = new LinearGradient(
   colors: [Color(0xFF57CDDB), Color(0xFF4AE296)]
 );
 
-Widget createGradientButton(LinearGradient gradient, double height, double width, BuildContext context, Widget route){
+Widget createGradientButton(LinearGradient gradient, double height, double width, BuildContext context, Widget route, String content){
   return Container(
     decoration: BoxDecoration(
       gradient: gradient,
@@ -66,7 +66,7 @@ Widget createGradientButton(LinearGradient gradient, double height, double width
           borderRadius: BorderRadius.circular(24.0),
           child: Center(
               child: Text(
-                "Explore!",
+                content,
                 style: TextStyle(
                   fontFamily: "Nunito",
                   fontSize: 18.0,
