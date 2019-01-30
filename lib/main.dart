@@ -8,27 +8,75 @@ import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
 
 //!Run splash screen on load!
-void main() => runApp(new Splash());
+void main() => runApp(Splash());
 
 const timeout = const Duration(seconds: 5);
 
 class MainPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new MainPageState();
+    return MainPageState();
   }
 }
 
 class MainPageState extends State<MainPage> {
   var _context;
+  void _select(Choice choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+    print(choice.title);
+    if (choice.title == "Log out") {
+      global.studentID = "";
+      global.cookie = "";
+      Route route = MaterialPageRoute(builder: (context) => LoginPage());
+      Navigator.pushReplacement(context, route);
+    }
+    return;
+  }
 
   Widget _buildPage({int index}) {
     update(index);
     return Container(
       alignment: AlignmentDirectional.center,
-      child: Text(
-        global.subjects[index],
-        style: TextStyle(fontFamily: "Nunito", color: Colors.grey),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            child: Text(
+              global.subjects[index],
+              textAlign: TextAlign.center,
+              style: TextStyle(fontFamily: "Nunito", color: Colors.grey),
+            ),
+            height: 200.0,
+          ),
+          SizedBox(
+            height: 200.0,
+            width: 300.0,
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24.0),
+              ),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SubjectMap()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(24.0),
+                child: Column(
+                  children: <Widget>[
+                    Center(
+                      child: Text(
+                        "Chicken",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -49,44 +97,16 @@ class MainPageState extends State<MainPage> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: new Container(
-          height: 48.0,
-          width: 180.0,
-          child: new Material(
-            borderRadius: BorderRadius.circular(24.0),
-            shadowColor: Colors.lightBlueAccent,
-            color: Colors.lightBlue,
-            elevation: 4.0,
-            child: new InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SubjectMap()),
-                );
-              },
-              borderRadius: BorderRadius.circular(24.0),
-              child: new Center(
-                child: new Center(
-                  child: new Text(
-                    "Explore!",
-                    style: new TextStyle(
-                      fontFamily: "Nunito",
-                      fontSize: 16.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          )),
+      floatingActionButton: global.createGradientButton(
+          global.blueGradient, 48, 156, context, SubjectMap()),
       bottomNavigationBar: BottomAppBar(
-        notchMargin: 4.0,
-        child: new Row(
+        color: global.appBarLightBlue,
+        child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             PopupMenuButton<Choice>(
-              icon: new Icon(Icons.more_vert),
+              icon: Icon(Icons.more_vert),
               onSelected: _select,
               offset: Offset(0, -120),
               itemBuilder: (BuildContext context) {
@@ -114,7 +134,7 @@ void update(int index) async {
     if (response.statusCode == 200) {
       //_showDialog("Successful Login");
       print("Successful Data Transfer");
-      Post temp = new Post.fromJson(json.decode(response.body));
+      Post temp = Post.fromJson(json.decode(response.body));
       global.overallProgress[index] = temp.overallProgress;
       global.totalScore[index] = temp.tScore;
     } else {
@@ -149,17 +169,3 @@ const List<Choice> choices = const <Choice>[
   const Choice(title: 'Settings', icon: Icons.settings),
   const Choice(title: 'Log out', icon: Icons.power_settings_new),
 ];
-
-void _select(Choice choice) {
-  // Causes the app to rebuild with the new _selectedChoice.
-  print(choice.title);
-  // if (choice.title == "Log out") {
-  //   global.studentID = "";
-  //   global.cookie = "";
-  //   Route route = MaterialPageRoute(builder: (context) => LoginPage());
-  //   Navigator.pushReplacement(context, route);
-  // }
-  return;
-}
-
-

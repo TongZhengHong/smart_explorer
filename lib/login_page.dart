@@ -48,24 +48,33 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
 
-    final Widget username = TextField(
-      controller: _usernameControl,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
-          labelText: "Student ID",
-          labelStyle: TextStyle(fontFamily: "Nunito", color: global.blue),
+    final Widget username = Theme(
+        data: ThemeData(primaryColor: global.blue),
+        child: TextField(
+          controller: _usernameControl,
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
+            border: OutlineInputBorder(),
+            labelText: "Student ID",
+            labelStyle: TextStyle(fontFamily: "Nunito",),
           ),
-    );
+        ));
 
-    final Widget password = TextField(
-      controller: _passwordControl,
-      obscureText: true,
-      decoration: InputDecoration(
-        fillColor: global.blue,
+    final Widget password = Theme(
+      data: ThemeData(primaryColor: global.blue,),
+      child: TextField(
+        controller: _passwordControl,
+        obscureText: true,
+        decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
+          fillColor: global.blue,
           border: OutlineInputBorder(),
           labelText: "Password",
-          labelStyle: new TextStyle(fontFamily: "Nunito", color: global.blue),)
+          labelStyle: new TextStyle(fontFamily: "Nunito",),
+        )
+      )
     );
+
     void _showDialog(String str) {
       // flutter defined function
       showDialog(
@@ -122,39 +131,40 @@ class LoginPageState extends State<LoginPage> {
       });
     }
 
-    final Widget button = new Container(
-        decoration: BoxDecoration(
-          gradient: global.blueButtonGradient,
+    final Widget button = Container(
+      decoration: BoxDecoration(
+        gradient: global.blueButtonGradient,
+        borderRadius: BorderRadius.circular(24.0),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
+        ],
+      ),
+      height: 48.0,
+      child: Material(
+        color: Colors.transparent,
+        child: new InkWell(
+          onTap: () {
+            login(_usernameControl.text, _passwordControl.text);
+            print("Login clicked!");
+          },
           borderRadius: BorderRadius.circular(24.0),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
-          ],
-        ),
-        height: 48.0,
-        child: Material(
-          color: Colors.transparent,
-          child: new InkWell(
-            onTap: () {
-              login(_usernameControl.text, _passwordControl.text);
-              print("Login clicked!");
-            },
-            borderRadius: BorderRadius.circular(24.0),
+          child: new Center(
             child: new Center(
-              child: new Center(
-                child: new Text(
-                  "Login!",
-                  style: new TextStyle(
-                    fontFamily: "Nunito",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                    color: Colors.white,
-                  ),
+              child: new Text(
+                "Login!",
+                style: new TextStyle(
+                  fontFamily: "Nunito",
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
-        ));
+        ),
+      )
+    );
 
     return new Scaffold(
       resizeToAvoidBottomPadding: true,
