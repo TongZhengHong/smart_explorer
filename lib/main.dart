@@ -38,8 +38,8 @@ class MainPageState extends State<MainPage> {
     return Container(
       alignment: AlignmentDirectional.center,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
+        //crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             child: Text(
@@ -47,11 +47,11 @@ class MainPageState extends State<MainPage> {
               textAlign: TextAlign.center,
               style: TextStyle(fontFamily: "Nunito", color: Colors.grey),
             ),
-            height: 200.0,
+            //height: 200.0,
           ),
           SizedBox(
-            height: 200.0,
-            width: 300.0,
+            height: global.phoneHeight*0.6,
+            width: global.phoneWidth*0.9,
             child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24.0),
@@ -86,6 +86,17 @@ class MainPageState extends State<MainPage> {
     _context = context;
     return Scaffold(
       backgroundColor: global.backgroundWhite,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, 
+        elevation: 0.0,
+        title: Row(
+          children: <Widget>[
+            Padding(padding: EdgeInsets.only(left: 16.0),),
+            Text("Studious", style: TextStyle(color: Colors.black, fontFamily: "Audiowide", fontSize: 24.0),),
+          ],
+        ),
+        centerTitle: false,
+      ),
       body: PageView(
         onPageChanged: (index) {
           global.subindex = index;
@@ -107,7 +118,7 @@ class MainPageState extends State<MainPage> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             PopupMenuButton<Choice>(
-              icon: Icon(Icons.more_vert),
+              icon: Icon(Icons.more_vert, color: Colors.grey.shade700,),
               onSelected: _select,
               offset: Offset(0, -120),
               itemBuilder: (BuildContext context) {

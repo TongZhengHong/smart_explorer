@@ -36,7 +36,7 @@ class MyHome extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("A studious\nadventure!", 
+              Text("Studious", 
                 style: TextStyle(fontFamily: "Audiowide", fontSize: 36.0,),
                 textAlign: TextAlign.center,
               ),
