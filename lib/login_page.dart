@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_explorer/main.dart';
 import 'package:smart_explorer/global.dart' as global;
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
@@ -112,20 +112,20 @@ class LoginPageState extends State<LoginPage> {
         if (response.statusCode == 200) {
           //_showDialog("Successful Login");
           print("Successful Login");
-          String studentID = username;
+          global.studentID = username;
           String rawCookie = response.headers['set-cookie'];
           int index = rawCookie.indexOf(';');
 
-          global.cookie =
+         global.cookie =
               (index == -1) ? rawCookie : rawCookie.substring(0, index);
           Post temp = new Post.fromJson(json.decode(response.body));
-          String studentName = temp.name;
-          String studentEmail = temp.email;
+          global.studentName = temp.name;
+          global.studentEmail = temp.email;
 
-          List<String> info = [studentID, studentName, studentEmail];
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setStringList("AuthDetails", info);
-          await prefs.setString(global.pref_cookie, global.cookie);
+       //   List<String> info = [global.studentID, global.studentName, global.studentEmail];
+     //     SharedPreferences prefs = await SharedPreferences.getInstance();
+       //   await prefs.setStringList("AuthDetails", info);
+       //   await prefs.setString(global.pref_cookie, global.cookie);
 
           Route route = MaterialPageRoute(builder: (context) => MainPage());
           Navigator.pushReplacement(context, route);
