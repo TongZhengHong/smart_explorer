@@ -4,6 +4,7 @@ import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
 import 'package:smart_explorer/subject_map.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
@@ -22,14 +23,22 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   var _context;
-  void _select(Choice choice) {
-    // Causes the app to rebuild with the new _selectedChoice.
+
+  void _select(Choice choice) async {
     print(choice.title);
     if (choice.title == "Log out") {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
       global.studentID = "";
       global.cookie = "";
+      await prefs.setStringList("AuthDetails", []);
+      await prefs.setString(global.pref_cookie, global.cookie);
+
       Route route = MaterialPageRoute(builder: (context) => LoginPage());
       Navigator.pushReplacement(context, route);
+    } else if (choice.title == "Profile") {
+
+    } else if (choice.title == "Settings") {
+
     }
     return;
   }
@@ -37,14 +46,12 @@ class MainPageState extends State<MainPage> {
   Widget _buildPage({int index}) {
     void update(int index) async {
   String url = 'https://tinypingu.infocommsociety.com/subjectprogress';
-  print(global.studentID);
-  print("TONG IS SMART");
-  print(global.cookie);
+  print("Student ID: " + global.studentID);
+  print("Cookie: " + global.cookie);
   await http.post(url,
       body: {"ID": global.studentID},
       headers: {"cookie": global.cookie}).then((dynamic response) {
     if (response.statusCode == 200) {
-      //_showDialog("Successful Login");
       print("Successful Data Transfer");
       Post temp = Post.fromJson(json.decode(response.body));
       global.overallProgress[index] = temp.overallProgress;
@@ -186,8 +193,6 @@ class MainPageState extends State<MainPage> {
   }
 }
 
-
-
 class Post {
   final double overallProgress;
   final int tScore;
@@ -210,6 +215,7 @@ class Choice {
 }
 
 const List<Choice> choices = const <Choice>[
+  const Choice(title: 'Profile', icon: Icons.person),
   const Choice(title: 'Settings', icon: Icons.settings),
   const Choice(title: 'Log out', icon: Icons.power_settings_new),
 ];
