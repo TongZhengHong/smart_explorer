@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:smart_explorer/global.dart' as global;
 import 'package:smart_explorer/login_page.dart';
 import 'package:smart_explorer/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-const timeout = const Duration(seconds: 5);
+const timeout = const Duration(seconds: 3);
 
 class Splash extends StatelessWidget {
   @override
@@ -19,7 +20,9 @@ class MyHome extends StatelessWidget {
   var _context;
 
   MyHome() {
-    Timer(timeout, () {
+    Timer(timeout, () async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      global.cookie = prefs.getString(global.pref_cookie) ?? "";
       Route route = MaterialPageRoute(builder: (context) => global.cookie == "" ? LoginPage() : MainPage());
       Navigator.pushReplacement(_context, route);
     });

@@ -1,17 +1,22 @@
 library my_prj.globals;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_explorer/subject_map.dart';
 import 'package:smart_explorer/main.dart';
 
 int subindex = 0;
-List<String> subjects = ["Economics", "Math", "Chemistry", "Physics"];
+List<String> subjects = ["H2 Economics", "H2 Math", "H2 Chemistry", "H2 Physics"];
 String studentID = "";
 String studentName = "";
 String studentEmail = "";
-List<int> overallProgress = [0,0,0,0];
+List<double> overallProgress = [0,0,0,0];
 List<int> totalScore = [0,0,0,0];
 String cookie = "";
+
+//! Shared Preferences key values
+String pref_cookie = "cookie";
+String auth_details = "AuthDetails";
 
 //! Parameters
 double phoneHeight = 0.0;

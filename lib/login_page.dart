@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_explorer/main.dart';
 import 'package:smart_explorer/global.dart' as global;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
@@ -48,7 +49,7 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
 
-    final Widget username = Theme(
+    final Widget usernameTextField = Theme(
         data: ThemeData(primaryColor: global.blue),
         child: TextField(
           controller: _usernameControl,
@@ -60,7 +61,7 @@ class LoginPageState extends State<LoginPage> {
           ),
         ));
 
-    final Widget password = Theme(
+    final Widget passwordTextField = Theme(
       data: ThemeData(primaryColor: global.blue,),
       child: TextField(
         controller: _passwordControl,
@@ -98,34 +99,41 @@ class LoginPageState extends State<LoginPage> {
       );
     }
 
-    login(String username1, String password1) async {
-      if (username1 == "") {
+    login(String username, String password) async {
+      if (username == "") {
         _showDialog("Username cannot be empty");
         print("Username cannot be empty");
         return;
       }
       String url = 'https://tinypingu.infocommsociety.com/login2';
       await http
-          .post(url, body: {"username": username1, "password": password1}).then(
-              (dynamic response) {
+          .post(url, body: {"username": username, "password": password}).then(
+              (dynamic response) async {
         if (response.statusCode == 200) {
           //_showDialog("Successful Login");
           print("Successful Login");
-          global.studentID = username1;
+          String studentID = username;
           String rawCookie = response.headers['set-cookie'];
           int index = rawCookie.indexOf(';');
+
           global.cookie =
               (index == -1) ? rawCookie : rawCookie.substring(0, index);
           Post temp = new Post.fromJson(json.decode(response.body));
-          global.studentName = temp.name;
-          global.studentEmail = temp.email;
+          String studentName = temp.name;
+          String studentEmail = temp.email;
+
+          List<String> info = [studentID, studentName, studentEmail];
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setStringList("AuthDetails", info);
+          await prefs.setString(global.pref_cookie, global.cookie);
+
           Route route = MaterialPageRoute(builder: (context) => MainPage());
           Navigator.pushReplacement(context, route);
         } else if (response.statusCode == 400) {
           _showDialog("Wrong Username or Password");
           print("Wrong Username or Password");
         } else {
-          _showDialog(":(");
+          _showDialog(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ":(");
           print(":(");
         }
       });
@@ -178,11 +186,11 @@ class LoginPageState extends State<LoginPage> {
             SizedBox(
               height: 16.0,
             ),
-            username,
+            usernameTextField,
             SizedBox(
               height: 16.0,
             ),
-            password,
+            passwordTextField,
             SizedBox(
               height: 24.0,
             ),
