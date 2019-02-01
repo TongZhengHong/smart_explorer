@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
 import 'package:smart_explorer/subject_map.dart';
+import 'package:smart_explorer/subject_popup.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,15 +57,14 @@ class MainPageState extends State<MainPage> {
       Post temp = Post.fromJson(json.decode(response.body));
       global.overallProgress[index] = temp.overallProgress;
       global.totalScore[index] = temp.tScore;
-    } else if(response.statusCode==302){
-        global.studentID = "";
-        global.cookie = "";
-        Route route = MaterialPageRoute(builder: (context) => LoginPage());
-        Navigator.pushReplacement(context, route);
     }else{
       print(response.statusCode);
       print("hi2");
       print(":(");
+      global.studentID = "";
+      global.cookie = "";
+      Route route = MaterialPageRoute(builder: (context) => LoginPage());
+      Navigator.pushReplacement(context, route);
     }
   });
 }
@@ -84,20 +84,20 @@ class MainPageState extends State<MainPage> {
             ),
             //height: 200.0,
           ),
-          SizedBox(
-            height: global.phoneHeight*0.4,
-            width: global.phoneWidth*0.9,
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24.0),
-              ),
-              child: Hero(
-                tag: global.subjects[index],
+          Hero(
+            tag: global.subjects[index],
+            child: SizedBox(
+              height: global.phoneHeight*0.4,
+              width: global.phoneWidth*0.9,
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24.0),
+                ),
                 child: InkWell(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SubjectMap()),
+                      MaterialPageRoute(builder: (context) => SubjectPopup()),
                     );
                   },
                   borderRadius: BorderRadius.circular(24.0),
@@ -120,12 +120,34 @@ class MainPageState extends State<MainPage> {
                       Padding(
                         padding:EdgeInsets.fromLTRB(global.phoneWidth*0.10, 0, global.phoneWidth*0.10, 0),
                         child: LinearPercentIndicator(
-                          width: global.phoneWidth*0.50,
+                          width: global.phoneWidth*0.60,
                           lineHeight: 8.0,
-                          percent: global.overallProgress[index],
+                          percent: global.overallProgress[index]/100,
                           progressColor: Colors.orange,
                         )
                       ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(global.phoneWidth*0.10, global.phoneHeight*0.05, global.phoneWidth*0.10, 0),
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(
+                              height: global.phoneWidth*0.20,
+                              width: global.phoneWidth*0.20,
+                              child: Container(
+                                decoration: new BoxDecoration(
+                                  border: new Border.all(color: Colors.blueAccent)
+                                ),
+                                child: Column(
+                                  children: <Widget>[
+                                    Text("hi"),
+                                    Text("hi2")
+                                  ],
+                                )
+                              ),
+                            )
+                          ],
+                        )
+                      )
                     ],
                   ),
                 ),
@@ -184,7 +206,7 @@ class MainPageState extends State<MainPage> {
                     child: Text(choice.title),
                   );
                 }).toList();
-              },
+              }, 
             ),
           ],
         ),

@@ -1,6 +1,6 @@
 library my_prj.globals;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_explorer/subject_map.dart';
 import 'package:smart_explorer/main.dart';
