@@ -23,6 +23,9 @@ class MyHome extends StatelessWidget {
     Timer(timeout, () async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       global.cookie = prefs.getString(global.pref_cookie) ?? "";
+      List<String> info_list = prefs.getStringList(global.auth_details) ?? [];
+      global.studentID = info_list.isEmpty ? "" : info_list[0];
+
       Route route = MaterialPageRoute(builder: (context) => global.cookie == "" ? LoginPage() : MainPage());
       Navigator.pushReplacement(_context, route);
     });

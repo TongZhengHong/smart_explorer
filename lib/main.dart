@@ -31,7 +31,7 @@ class MainPageState extends State<MainPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       global.studentID = "";
       global.cookie = "";
-      await prefs.setStringList("AuthDetails", []);
+      await prefs.setStringList(global.auth_details, []);
       await prefs.setString(global.pref_cookie, global.cookie);
 
       Route route = MaterialPageRoute(builder: (context) => LoginPage());
@@ -46,35 +46,34 @@ class MainPageState extends State<MainPage> {
 
   Widget _buildPage({int index}) {
     void update(int index) async {
-  String url = 'https://tinypingu.infocommsociety.com/subjectprogress';
-  print("Student ID: " + global.studentID);
-  print("Cookie: " + global.cookie);
-  await http.post(url,
-      body: {"ID": global.studentID},
-      headers: {"cookie": global.cookie}).then((dynamic response) {
-    if (response.statusCode == 200) {
-      print("Successful Data Transfer");
-      Post temp = Post.fromJson(json.decode(response.body));
-      global.overallProgress[index] = temp.overallProgress;
-      global.totalScore[index] = temp.tScore;
-    }else{
-      print(response.statusCode);
-      print("hi2");
-      print(":(");
-      global.studentID = "";
-      global.cookie = "";
-      Route route = MaterialPageRoute(builder: (context) => LoginPage());
-      Navigator.pushReplacement(context, route);
+      String url = 'https://tinypingu.infocommsociety.com/subjectprogress';
+      print("Student ID: " + global.studentID);
+      print("Cookie: " + global.cookie);
+      await http.post(url,
+          body: {"ID": global.studentID},
+          headers: {"cookie": global.cookie}).then((dynamic response) {
+        if (response.statusCode == 200) {
+          print("Successful Data Transfer");
+          Post temp = Post.fromJson(json.decode(response.body));
+          global.overallProgress[index] = temp.overallProgress;
+          global.totalScore[index] = temp.tScore;
+        } else {
+          print(response.statusCode);
+          print("hi2");
+          print(":(");
+          global.studentID = "";
+          global.cookie = "";
+          Route route = MaterialPageRoute(builder: (context) => LoginPage());
+          Navigator.pushReplacement(context, route);
+        }
+      });
     }
-  });
-}
     update(index);
     print(global.overallProgress[index]);
     return Container(
       alignment: AlignmentDirectional.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
-        //crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             child: Text(
@@ -82,7 +81,6 @@ class MainPageState extends State<MainPage> {
               textAlign: TextAlign.center,
               style: TextStyle(fontFamily: "Nunito", color: Colors.grey),
             ),
-            //height: 200.0,
           ),
           Hero(
             tag: global.subjects[index],
@@ -91,7 +89,7 @@ class MainPageState extends State<MainPage> {
               width: global.phoneWidth*0.9,
               child: Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24.0),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
                 ),
                 child: InkWell(
                   onTap: () {
