@@ -13,17 +13,17 @@ class SubjectMap extends StatefulWidget {
 }
 
 class SubjectMapState extends State<SubjectMap> {
-  ScrollController _scroll = new ScrollController();
+  ScrollController _scroll = ScrollController();
   int idx = global.subindex;
+  
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
-    return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        
         title: Text(global.subjects[idx]),
       ),
-      body: new ListView.builder(
+      body: ListView.builder(
         controller: _scroll,
         itemCount: positions.length,
         itemBuilder: (context, i) {

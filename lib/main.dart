@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
 import 'package:smart_explorer/subject_map.dart';
 import 'package:smart_explorer/subject_popup.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_explorer/settings.dart';
+import 'package:smart_explorer/profile.dart';
 
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
@@ -23,7 +26,8 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  var _context;
+  //var _context;
+  double _card_height = global.phoneHeight*0.3;
 
   void _select(Choice choice) async {
     print(choice.title);
@@ -37,9 +41,11 @@ class MainPageState extends State<MainPage> {
       Route route = MaterialPageRoute(builder: (context) => LoginPage());
       Navigator.pushReplacement(context, route);
     } else if (choice.title == "Profile") {
-
+      Route route = MaterialPageRoute(builder: (context) => ProfilePage());
+      Navigator.push(context, route);
     } else if (choice.title == "Settings") {
-
+      Route route = MaterialPageRoute(builder: (context) => SettingsPage());
+      Navigator.push(context, route);
     }
     return;
   }
@@ -68,107 +74,95 @@ class MainPageState extends State<MainPage> {
         }
       });
     }
+
     update(index);
-    print(global.overallProgress[index]);
+    print("Testing: " + global.overallProgress[index].toString());
     return Container(
-      alignment: AlignmentDirectional.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Container(
-            child: Text(
-              global.subjects[index],
-              textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: "Nunito", color: Colors.grey),
-            ),
+        height: double.maxFinite,
+        alignment: AlignmentDirectional.center,
+        child: Stack(children: <Widget>[
+          Positioned(
+            child: Align(
+                alignment: FractionalOffset.topCenter,
+                child: Container(
+                  padding: EdgeInsets.only(top: 56.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.redAccent,
+                    radius: 64.0,
+                  ),
+                )),
           ),
-          Hero(
-            tag: global.subjects[index],
-            child: SizedBox(
-              height: global.phoneHeight*0.4,
-              width: global.phoneWidth*0.9,
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SubjectPopup()),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(24.0),
-                  child: Column(
-                    children: <Widget>[
-                      Icon(
-                        Icons.keyboard_arrow_up,
-                        color:Colors.grey,
-                      ),
-                      Text(
-                        global.subjects[index],
-                        style: TextStyle(fontFamily: "Nunito", fontSize: 30.0),
-                      ),
-                      Padding(
-                        padding:EdgeInsets.fromLTRB(global.phoneWidth*0.30, 0, global.phoneWidth*0.30, 0),
-                        child: Divider(
-                          color : Colors.grey,
+          Positioned(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  double position = global.phoneHeight - details.globalPosition.dy;
+                  // setState(() {
+                  //   if (position < global.phoneHeight)
+                  //     _card_height = global.phoneHeight;
+                  //   else if (position > global.phoneHeight / 2)
+                  //     _card_height = global.phoneHeight / 2;
+                  //   else
+                  //     _card_height = position;
+                  // });
+                  print(position);
+                },
+                child: SizedBox(
+                  height: _card_height,
+                  width: global.phoneWidth * 0.9,
+                  child: Material(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16.0),
+                        topRight: Radius.circular(16.0)),
+                    color: Theme.of(context).cardColor,
+                    elevation: 2.0,
+                    child: InkWell(
+                      //onTap: () {},
+                      child: Column(children: <Widget>[
+                        Icon(
+                          Icons.keyboard_arrow_up,
+                          color: Colors.grey,
                         ),
-                      ),
-                      Padding(
-                        padding:EdgeInsets.fromLTRB(global.phoneWidth*0.10, 0, global.phoneWidth*0.10, 0),
-                        child: LinearPercentIndicator(
-                          width: global.phoneWidth*0.60,
-                          lineHeight: 8.0,
-                          percent: global.overallProgress[index]/100,
-                          progressColor: Colors.orange,
-                        )
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(global.phoneWidth*0.10, global.phoneHeight*0.05, global.phoneWidth*0.10, 0),
-                        child: Row(
-                          children: <Widget>[
-                            SizedBox(
-                              height: global.phoneWidth*0.20,
-                              width: global.phoneWidth*0.20,
-                              child: Container(
-                                decoration: new BoxDecoration(
-                                  border: new Border.all(color: Colors.blueAccent)
-                                ),
-                                child: Column(
-                                  children: <Widget>[
-                                    Text("hi"),
-                                    Text("hi2")
-                                  ],
-                                )
-                              ),
-                            )
-                          ],
-                        )
-                      )
-                    ],
+                        Text(
+                          global.subjects[index],
+                          style:
+                              TextStyle(fontFamily: "Nunito", fontSize: 20.0),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.30,
+                              0, global.phoneWidth * 0.30, 0),
+                          child: Divider(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ]),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
+        ]));
   }
 
   @override
   Widget build(BuildContext context) {
-    _context = context;
     return Scaffold(
       backgroundColor: global.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, 
+        backgroundColor: Colors.transparent,
         elevation: 0.0,
         title: Row(
           children: <Widget>[
-            Padding(padding: EdgeInsets.only(left: 16.0),),
-            Text("Studious", style: TextStyle(color: Colors.black, fontFamily: "Audiowide", fontSize: 24.0),),
+            Padding(
+              padding: EdgeInsets.only(left: 16.0),
+            ),
+            Text(
+              "Studious",
+              style: TextStyle(
+                  color: Colors.black, fontFamily: "Audiowide", fontSize: 20.0),
+            ),
           ],
         ),
         centerTitle: false,
@@ -185,28 +179,35 @@ class MainPageState extends State<MainPage> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: global.createGradientButton(
-          global.blueGradient, 48, global.phoneWidth*0.5, context, SubjectMap(), "Explore!"),
+      floatingActionButton: global.createGradientButton(global.blueGradient, 56,
+          global.phoneWidth * 0.5, context, SubjectMap(), "Explore!"),
       bottomNavigationBar: BottomAppBar(
+        elevation: 10.0,
         color: global.appBarLightBlue,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            PopupMenuButton<Choice>(
-              icon: Icon(Icons.more_vert, color: Colors.grey.shade700,),
-              onSelected: _select,
-              offset: Offset(0, -120),
-              itemBuilder: (BuildContext context) {
-                return choices.map((Choice choice) {
-                  return PopupMenuItem<Choice>(
-                    value: choice,
-                    child: Text(choice.title),
-                  );
-                }).toList();
-              }, 
-            ),
-          ],
+        child: Container(
+          height: global.bottomAppBarHeight,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              PopupMenuButton<Choice>(
+                icon: Icon(
+                  Icons.more_vert,
+                  color: Colors.blueGrey.shade500,
+                ),
+                onSelected: _select,
+                //offset: Offset(0, -120),
+                itemBuilder: (BuildContext context) {
+                  return choices.map((Choice choice) {
+                    return PopupMenuItem<Choice>(
+                      value: choice,
+                      child: Text(choice.title),
+                    );
+                  }).toList();
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

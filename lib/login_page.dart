@@ -133,7 +133,7 @@ class LoginPageState extends State<LoginPage> {
           _showDialog("Wrong Username or Password");
           print("Wrong Username or Password");
         } else {
-          _showDialog(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ":(");
+          _showDialog(":(");
           print(":(");
         }
       });

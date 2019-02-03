@@ -22,6 +22,7 @@ String auth_details = "AuthDetails";
 double phoneHeight = 0.0;
 double phoneWidth = 0.0;
 double navBarHeight = 200;
+double bottomAppBarHeight = 56.0;
 
 //! Colours:
 Color blue = const Color(0xFF78B2FA);
@@ -74,7 +75,7 @@ Widget createGradientButton(LinearGradient gradient, double height, double width
                 content,
                 style: TextStyle(
                   fontFamily: "Nunito",
-                  fontSize: 18.0,
+                  fontSize: 20.0,
                   color: Colors.white,
                 ),
               ),

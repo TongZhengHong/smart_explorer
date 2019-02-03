@@ -33,8 +33,7 @@ class SubjectPopupState extends State<SubjectPopup> {
     return Scaffold(
       backgroundColor: global.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, 
-        elevation: 0.0,
+        backgroundColor: global.appBarLightBlue, 
         title: Row(
           children: <Widget>[
             Padding(padding: EdgeInsets.only(left: 16.0),),

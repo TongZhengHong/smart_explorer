@@ -26,8 +26,8 @@ class MyHome extends StatelessWidget {
       List<String> info_list = prefs.getStringList(global.auth_details) ?? [];
       global.studentID = info_list.isEmpty ? "" : info_list[0];
 
-      Route route = MaterialPageRoute(builder: (context) => global.cookie == "" ? LoginPage() : MainPage());
-      Navigator.pushReplacement(_context, route);
+      Route route = MaterialPageRoute(builder: (context) => (global.cookie) == "" ? LoginPage() : MainPage());
+      Navigator.push(_context, route);
     });
   }
 
