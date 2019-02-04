@@ -27,7 +27,6 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   //var _context;
-  double _card_height = global.phoneHeight*0.3;
 
   void _select(Choice choice) async {
     print(choice.title);
@@ -95,52 +94,7 @@ class MainPageState extends State<MainPage> {
           Positioned(
             child: Align(
               alignment: FractionalOffset.bottomCenter,
-              child: GestureDetector(
-                onVerticalDragUpdate: (details) {
-                  double position = global.phoneHeight - details.globalPosition.dy;
-                  // setState(() {
-                  //   if (position < global.phoneHeight)
-                  //     _card_height = global.phoneHeight;
-                  //   else if (position > global.phoneHeight / 2)
-                  //     _card_height = global.phoneHeight / 2;
-                  //   else
-                  //     _card_height = position;
-                  // });
-                  print(position);
-                },
-                child: SizedBox(
-                  height: _card_height,
-                  width: global.phoneWidth * 0.9,
-                  child: Material(
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16.0),
-                        topRight: Radius.circular(16.0)),
-                    color: Theme.of(context).cardColor,
-                    elevation: 2.0,
-                    child: InkWell(
-                      //onTap: () {},
-                      child: Column(children: <Widget>[
-                        Icon(
-                          Icons.keyboard_arrow_up,
-                          color: Colors.grey,
-                        ),
-                        Text(
-                          global.subjects[index],
-                          style:
-                              TextStyle(fontFamily: "Nunito", fontSize: 20.0),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.30,
-                              0, global.phoneWidth * 0.30, 0),
-                          child: Divider(
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ]),
-                    ),
-                  ),
-                ),
-              ),
+              child: ExpandableCard(index),
             ),
           ),
         ]));
@@ -207,6 +161,100 @@ class MainPageState extends State<MainPage> {
                 },
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ExpandableCard extends StatefulWidget {
+  final int index;
+  ExpandableCard(this.index);
+
+  @override
+  State<StatefulWidget> createState() {
+    return ExpandableCardState(index);
+  }
+}
+
+class ExpandableCardState extends State<ExpandableCard> {
+  int index;
+  ExpandableCardState(this.index);
+
+  GlobalKey cardKey = GlobalKey();
+  double maxCardHeight = global.phoneHeight * 0.5;
+  double minCardHeight = global.phoneHeight * 0.3;
+  double cardHeight = global.phoneHeight * 0.3;
+
+  double initialCardHeight = global.phoneHeight * 0.3;
+  double startPosition;
+  double position;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onVerticalDragDown: (details) {
+        startPosition = global.phoneHeight - details.globalPosition.dy;
+      },
+      onVerticalDragUpdate: (details) {
+        position = global.phoneHeight - details.globalPosition.dy; //? This is to invert the position
+        double delta = position - startPosition;
+        double temp = initialCardHeight + delta;
+        setState(() {
+          if (temp < minCardHeight) {
+            cardHeight = minCardHeight;
+          } else if (temp > maxCardHeight) {
+            cardHeight = maxCardHeight;
+          } else {
+            cardHeight = temp;
+          }
+        });
+      },
+      onVerticalDragEnd: (details) {
+        RenderBox cardBox = cardKey.currentContext.findRenderObject();
+        initialCardHeight = cardBox.size.height;
+
+        if (position > maxCardHeight) {
+          initialCardHeight = maxCardHeight;
+        } else if (position < minCardHeight) {
+          initialCardHeight = minCardHeight;
+        } else {
+          if (position < maxCardHeight/2){
+            //TODO: Minimise the card!
+          } else {
+            //TODO: Expand the card!
+          }
+        }
+      },
+      child: SizedBox(
+        key: cardKey,
+        height: cardHeight,
+        width: global.phoneWidth * 0.9,
+        child: Material(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)),
+          color: Theme.of(context).cardColor,
+          elevation: 2.0,
+          child: InkWell(
+            //onTap: () {},
+            child: Column(children: <Widget>[
+              Icon(
+                Icons.keyboard_arrow_up,
+                color: Colors.grey,
+              ),
+              Text(
+                global.subjects[index],
+                style: TextStyle(fontFamily: "Nunito", fontSize: 20.0),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                    global.phoneWidth * 0.30, 0, global.phoneWidth * 0.30, 0),
+                child: Divider(
+                  color: Colors.grey,
+                ),
+              ),
+            ]),
           ),
         ),
       ),
