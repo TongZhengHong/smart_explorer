@@ -76,51 +76,13 @@ class MainPageState extends State<MainPage> {
 
     update(index);
     print("Testing: " + global.overallProgress[index].toString());
-    return Container(
-        height: double.maxFinite,
-        alignment: AlignmentDirectional.center,
-        child: Stack(children: <Widget>[
-          Positioned(
-            child: Align(
-                alignment: FractionalOffset.topCenter,
-                child: Container(
-                  padding: EdgeInsets.only(top: 56.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.redAccent,
-                    radius: 64.0,
-                  ),
-                )),
-          ),
-          Positioned(
-            child: Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: ExpandableCard(index),
-            ),
-          ),
-        ]));
+    return ExpandableCard(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: global.backgroundWhite,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0.0,
-        title: Row(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 16.0),
-            ),
-            Text(
-              "Studious",
-              style: TextStyle(
-                  color: Colors.black, fontFamily: "Audiowide", fontSize: 20.0),
-            ),
-          ],
-        ),
-        centerTitle: false,
-      ),
       body: PageView(
         onPageChanged: (index) {
           global.subindex = index;
@@ -182,9 +144,11 @@ class ExpandableCardState extends State<ExpandableCard> {
   int index;
   ExpandableCardState(this.index);
 
+  double backgroundOpacity = 0.0;
+
   GlobalKey cardKey = GlobalKey();
-  double maxCardHeight = global.phoneHeight * 0.5;
-  double minCardHeight = global.phoneHeight * 0.3;
+  double maxCardHeight = global.phoneHeight * 0.75;
+  double minCardHeight = global.phoneHeight * 0.4;
   double cardHeight = global.phoneHeight * 0.3;
 
   double initialCardHeight = global.phoneHeight * 0.3;
@@ -193,72 +157,139 @@ class ExpandableCardState extends State<ExpandableCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragDown: (details) {
-        startPosition = global.phoneHeight - details.globalPosition.dy;
-      },
-      onVerticalDragUpdate: (details) {
-        position = global.phoneHeight - details.globalPosition.dy; //? This is to invert the position
-        double delta = position - startPosition;
-        double temp = initialCardHeight + delta;
-        setState(() {
-          if (temp < minCardHeight) {
-            cardHeight = minCardHeight;
-          } else if (temp > maxCardHeight) {
-            cardHeight = maxCardHeight;
-          } else {
-            cardHeight = temp;
-          }
-        });
-      },
-      onVerticalDragEnd: (details) {
-        RenderBox cardBox = cardKey.currentContext.findRenderObject();
-        initialCardHeight = cardBox.size.height;
-
-        if (position > maxCardHeight) {
-          initialCardHeight = maxCardHeight;
-        } else if (position < minCardHeight) {
-          initialCardHeight = minCardHeight;
-        } else {
-          if (position < maxCardHeight/2){
-            //TODO: Minimise the card!
-          } else {
-            //TODO: Expand the card!
-          }
-        }
-      },
-      child: SizedBox(
-        key: cardKey,
-        height: cardHeight,
-        width: global.phoneWidth * 0.9,
-        child: Material(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16.0), topRight: Radius.circular(16.0)),
-          color: Theme.of(context).cardColor,
-          elevation: 2.0,
-          child: InkWell(
-            //onTap: () {},
-            child: Column(children: <Widget>[
-              Icon(
-                Icons.keyboard_arrow_up,
-                color: Colors.grey,
+    return Stack(children: <Widget>[
+      Positioned(
+        child: Align(
+            alignment: FractionalOffset.topCenter,
+            child: Container(
+              padding: EdgeInsets.only(top: 128.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.redAccent,
+                radius: 72.0,
+              ),
+            )),
+      ),
+      Positioned(
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0.0,
+          title: Row(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(left: 16.0),
               ),
               Text(
-                global.subjects[index],
-                style: TextStyle(fontFamily: "Nunito", fontSize: 20.0),
+                "Studious",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: "Audiowide",
+                    fontSize: 20.0),
               ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                    global.phoneWidth * 0.30, 0, global.phoneWidth * 0.30, 0),
-                child: Divider(
-                  color: Colors.grey,
+            ],
+          ),
+          centerTitle: false,
+        ),
+      ),
+      Positioned(
+        child: Align(
+          alignment: FractionalOffset.bottomCenter,
+          child: GestureDetector(
+            onTap: () {
+              if (cardHeight == maxCardHeight) {
+                print("Close card");
+              }
+            },
+            child: Opacity(
+              opacity: backgroundOpacity,
+              child: SizedBox(
+                height: global.phoneHeight - global.bottomAppBarHeight,
+                width: global.phoneWidth,
+                child: Container(
+                  color: Colors.grey.shade800,
                 ),
               ),
-            ]),
+            ),
           ),
         ),
       ),
-    );
+      Positioned(
+        child: Align(
+          alignment: FractionalOffset.bottomCenter,
+          child: GestureDetector(
+            onVerticalDragDown: (details) {
+              startPosition = global.phoneHeight - details.globalPosition.dy;
+            },
+            onVerticalDragUpdate: (details) {
+              position = global.phoneHeight -
+                  details.globalPosition.dy; //? This is to invert the position
+              double delta = position - startPosition;
+              double temp = initialCardHeight + delta;
+              setState(() {
+                if (temp < minCardHeight) {
+                  cardHeight = minCardHeight;
+                } else if (temp > maxCardHeight) {
+                  cardHeight = maxCardHeight;
+                } else {
+                  cardHeight = temp;
+                }
+                backgroundOpacity = (cardHeight - minCardHeight) *
+                    0.6 /
+                    (maxCardHeight - minCardHeight);
+              });
+            },
+            onVerticalDragEnd: (details) {
+              RenderBox cardBox = cardKey.currentContext.findRenderObject();
+              initialCardHeight = cardBox.size.height;
+              double benchmark =
+                  minCardHeight + (maxCardHeight - minCardHeight) / 2;
+
+              if (position > maxCardHeight) {
+                initialCardHeight = maxCardHeight;
+              } else if (position < minCardHeight) {
+                initialCardHeight = minCardHeight;
+              } else {
+                if (cardHeight < benchmark) {
+                  //TODO: Minimise the card!
+                  print("Minimise card");
+                } else {
+                  //TODO: Expand the card!
+                  print("Expand card");
+                }
+              }
+            },
+            child: SizedBox(
+              key: cardKey,
+              height: cardHeight,
+              width: global.phoneWidth * 0.9,
+              child: Material(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16.0),
+                    topRight: Radius.circular(16.0)),
+                color: Theme.of(context).cardColor,
+                elevation: 2.0,
+                child: Column(children: <Widget>[
+                  Icon(
+                    Icons.keyboard_arrow_up,
+                    color: Colors.grey,
+                  ),
+                  Text(
+                    global.subjects[index],
+                    style: TextStyle(fontFamily: "Nunito", fontSize: 20.0),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.30, 0,
+                        global.phoneWidth * 0.30, 0),
+                    child: Divider(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
   }
 }
 
