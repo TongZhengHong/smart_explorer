@@ -27,7 +27,7 @@ class MyHome extends StatelessWidget {
       global.studentID = info_list.isEmpty ? "" : info_list[0];
 
       Route route = MaterialPageRoute(builder: (context) => (global.cookie) == "" ? LoginPage() : MainPage());
-      Navigator.push(_context, route);
+      Navigator.push(_context, route); //TODO: CHANGE TO PUSHREPLACMENT!
     });
   }
 

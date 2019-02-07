@@ -258,11 +258,11 @@ void _showDialog(BuildContext context, String str) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: new Text(str),
-        content: new Text(""),
+        title: Text(str),
+        content: Text(""),
         actions: <Widget>[
-          new FlatButton(
-            child: new Text("Close"),
+           FlatButton(
+            child: Text("Close"),
             onPressed: () {
               Navigator.of(context).pop();
             },
