@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/global.dart' as global;
 
+import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 double screenWidth;
 
-List<double> positions = [
-  235.0,
+List<double> activity_positions = [
+  /*235.0,
   162.0,
   86.0,
   155.0,
@@ -17,7 +18,7 @@ List<double> positions = [
   271.0,
   30.0,
   103.0,
-  180.0
+  180.0*/
 ];
 
 class SubjectMap extends StatefulWidget {
@@ -31,39 +32,38 @@ class SubjectMapState extends State<SubjectMap> {
   ScrollController _scroll = ScrollController();
   int idx = global.subindex;
   bool _loading = true;
-
-  //List data;
+  List chapData;
 
   Future<String> getChapData() async {
     print("Request sent!");
     print(global.cookie);
-    final String map_url =
+    final String mapUrl =
         "https://tinypingu.infocommsociety.com/api/exploremap";
     final response =
-        await http.get(map_url, headers: {"Cookie": global.cookie});
+        await http.post(mapUrl, headers: {"Cookie": global.cookie});
 
     if (response.statusCode == 200) {
-      print("Response success!");
-      final response_arr = json.decode(response.body);
-      response_arr.forEach((subject) {
-        String name = subject["name"];
-        print(name);
-        //final sub_children = subject["children"];
-
-        setState(() {
-          //var resBody = json.decode(res.body);
-          //data = resBody["chapter"];
-          _loading = false;
+      final responseArr = json.decode(response.body);
+      responseArr.forEach((subject) {
+        chapData = subject["children"];
+        print(chapData);
+        activity_positions = [];
+        final random = new Random();
+        print(chapData[0]["children"].length);
+        chapData[0]["children"].forEach((activity) {
+          int padding = random.nextInt(global.phoneWidth.toInt()-36);
+          activity_positions.add(padding.toDouble());
         });
+      }); //This is to get the first subject which is Econs
+
+      setState(() {
+        _loading = false;
       });
+      return "Success!";
     } else {
       print("Error!");
+      return "Error!";
     }
-
-    //final String url = "https://swapi.co/api/starships";
-    //var res = await http.get(Uri.encodeFull(url), headers: {"Accept": "application/json"});
-
-    return "Success!";
   }
 
   @override
@@ -79,30 +79,41 @@ class SubjectMapState extends State<SubjectMap> {
             )
           : ListView.builder(
               controller: _scroll,
-              itemCount: positions.length,
+              itemCount: activity_positions.length,
               itemBuilder: (context, i) {
                 double paddingTop = 0.0;
                 double paddingBottom = 0.0;
 
                 if (i != 0) {
-                  paddingTop = (positions[i - 1] - positions[i]) / 5;
+                  paddingTop =
+                      (activity_positions[i - 1] - activity_positions[i]) / 5;
                 }
-                if (i + 1 != positions.length) {
-                  paddingBottom = (positions[i + 1] - positions[i]) / 5;
+                if (i + 1 != activity_positions.length) {
+                  paddingBottom =
+                      (activity_positions[i + 1] - activity_positions[i]) / 5;
                 }
 
                 return new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     _buildCheckPoint(
-                        false, (positions[i] + 2 * paddingTop), paddingTop, i),
+                        false,
+                        (activity_positions[i] + 2 * paddingTop),
+                        paddingTop,
+                        i),
+                    _buildCheckPoint(false,
+                        (activity_positions[i] + paddingTop), paddingTop, i),
+                    _buildCheckPoint(true, activity_positions[i], 0.0, i),
                     _buildCheckPoint(
-                        false, (positions[i] + paddingTop), paddingTop, i),
-                    _buildCheckPoint(true, positions[i], 0.0, i),
-                    _buildCheckPoint(false, (positions[i] + paddingBottom),
-                        paddingBottom, i),
-                    _buildCheckPoint(false, (positions[i] + 2 * paddingBottom),
-                        paddingBottom, i),
+                        false,
+                        (activity_positions[i] + paddingBottom),
+                        paddingBottom,
+                        i),
+                    _buildCheckPoint(
+                        false,
+                        (activity_positions[i] + 2 * paddingBottom),
+                        paddingBottom,
+                        i),
                   ],
                 );
               },
@@ -152,6 +163,7 @@ class SubjectMapState extends State<SubjectMap> {
             : new InkWell(
                 borderRadius: BorderRadius.circular(diameter / 2),
                 onTap: () {
+                  global.chapindex = position;
                   _showActivityInfo();
                 },
               ),
@@ -167,7 +179,7 @@ class SubjectMapState extends State<SubjectMap> {
       barrierDismissible: true,
       barrierLabel: 'barrier',
       pageBuilder: (context, animation1, animation2) {
-        return RoundedAlertBox();
+        return _showActivityDialog();
       },
       transitionBuilder: (context, anim1, anim2, widget) {
         return new SlideTransition(
@@ -179,25 +191,42 @@ class SubjectMapState extends State<SubjectMap> {
       },
     );
   }
-}
 
-class RoundedAlertBox extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(32.0))),
-              contentPadding: EdgeInsets.only(top: 10.0),
-              content: Container(
-                width: 300.0,
-                height: 300.0,
-                child: Center(
-                  child: Text("dlajskfa"),
+  Widget _showActivityDialog() {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0))),
+      contentPadding: EdgeInsets.all(32.0),
+      content: Container(
+        width: global.phoneWidth * 1.0,
+        height: global.phoneHeight * 0.7,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(12.0), 
+                child: Container(
+                  width: global.phoneWidth * 0.9,
+                  child: Text(chapData[global.chapindex]["name"], textAlign: TextAlign.left),
                 ),
-              ));
-        });
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(16.0), 
+                child: Container(
+                  width: global.phoneWidth * 0.9,
+                  child: Text(chapData[global.subindex]["desc"], textAlign: TextAlign.left),
+                ),
+              ),
+              flex: 3,
+            ),
+            global.createGradientButton(global.blueGradient, 48, global.phoneWidth * 0.60, context, SubjectMap(), "Let's Go!"),
+          ],
+        ),
+      )
+    );
   }
 }

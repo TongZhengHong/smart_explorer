@@ -150,7 +150,7 @@ class ExpandableCardState extends State<ExpandableCard> {
   double maxCardHeight = global.phoneHeight * 0.75;
   double minCardHeight = global.phoneHeight * 0.4;
   double cardHeight = global.phoneHeight * 0.4;
-
+  
   double initialCardHeight = global.phoneHeight * 0.3;
   double startPosition;
   double position;

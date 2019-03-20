@@ -42,7 +42,7 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
   final _passwordControl = TextEditingController();
 
   void login(String username, String password) async {
-    String url = 'https://tinypingu.infocommsociety.com/login2';
+    String url = 'https://tinypingu.infocommsociety.com/api/login2';
     await http.post(url, body: {"username": username, "password": password}).then(
         (dynamic response) async {
       if (response.statusCode == 200) {
