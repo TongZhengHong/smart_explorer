@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +15,11 @@ import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
 
 //!Run splash screen on load!
-void main() => runApp(Splash());
+void main() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+    runApp(Splash());
+  });
+}
 
 const timeout = const Duration(seconds: 5);
 
@@ -51,25 +56,23 @@ class MainPageState extends State<MainPage> {
 
   Widget _buildPage({int index}) {
     void update(int index) async {
-      String url = 'https://tinypingu.infocommsociety.com/subjectprogress';
+      String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
       print("Student ID: " + global.studentID);
       print("Cookie: " + global.cookie);
       await http.post(url,
-          body: {"ID": global.studentID},
           headers: {"cookie": global.cookie}).then((dynamic response) {
         if (response.statusCode == 200) {
           print("Successful Data Transfer");
           Post temp = Post.fromJson(json.decode(response.body));
           global.overallProgress[index] = temp.overallProgress;
           global.totalScore[index] = temp.tScore;
+          print("Break");
         } else {
-          print(response.statusCode);
-          print("hi2");
-          print(":(");
+          print("Error when retrieving page info");
           global.studentID = "";
           global.cookie = "";
-          Route route = MaterialPageRoute(builder: (context) => LoginPage());
-          Navigator.pushReplacement(context, route);
+          // Route route = MaterialPageRoute(builder: (context) => LoginPage());
+          // Navigator.pushReplacement(context, route);
         }
       });
     }
@@ -163,10 +166,15 @@ class ExpandableCardState extends State<ExpandableCard> {
             alignment: FractionalOffset.topCenter,
             child: Container(
               padding: EdgeInsets.only(top: 128.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.redAccent,
-                radius: 72.0,
-              ),
+              child: Theme(
+                data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+                child: CircularProgressIndicator(backgroundColor: Colors.yellow, strokeWidth: 10.0,),
+              )
+              
+              // child: CircleAvatar(
+              //   backgroundColor: Colors.redAccent,
+              //   radius: 72.0,
+              // ),
             )),
       ),
       Positioned(

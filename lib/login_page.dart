@@ -26,7 +26,7 @@ class Post {
   }
 }
 
-class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
+class LoginPageState extends State<LoginPage> {
   bool validateUsernameEmpty = false;
   bool validatePasswordEmpty = false;
 
@@ -43,8 +43,9 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
 
   void login(String username, String password) async {
     String url = 'https://tinypingu.infocommsociety.com/api/login2';
-    await http.post(url, body: {"username": username, "password": password}).then(
-        (dynamic response) async {
+    await http
+        .post(url, body: {"username": username, "password": password}).then(
+            (dynamic response) async {
       if (response.statusCode == 200) {
         loading = false;
         print("Successful Login");
@@ -52,7 +53,8 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
         String rawCookie = response.headers['set-cookie'];
         int index = rawCookie.indexOf(';');
 
-        global.cookie = (index == -1) ? rawCookie : rawCookie.substring(0, index);
+        global.cookie =
+            (index == -1) ? rawCookie : rawCookie.substring(0, index);
         Post temp = new Post.fromJson(json.decode(response.body));
         global.studentName = temp.name;
         global.studentEmail = temp.email;
@@ -67,16 +69,37 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
         await prefs.setStringList("AuthDetails", info);
         await prefs.setString(global.pref_cookie, global.cookie);
 
-        Route route = MaterialPageRoute(builder: (context) => MainPage());
-        Navigator.pushReplacement(context, route);
+        // Route route = MaterialPageRoute(builder: (context) => MainPage());
+        // Navigator.pushReplacement(context, route);
       } else if (response.statusCode == 400) {
-        _showDialog(context, "Wrong Username or Password");
-        print("Wrong Username or Password");
+        loading = false;
+        _showDialog("Wrong Username or Password!");
+        print("Wrong Username or Password!");
       } else {
-        _showDialog(context, ":(");
-        print(":(");
+        _showDialog("Unexpected login error. Please check your network");
+        print("Unexpected login error");
       }
     });
+  }
+
+  void _showDialog(String str) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(str),
+          content: Text(""),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -97,44 +120,44 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
 
 //! //////////////////////////// Username Text Field ////////////////////////////
     final Widget usernameTextField = Theme(
-      data: ThemeData(primaryColor: global.blue),
-      child: TextField(
-        onChanged: (text) {
-          setState(() {
-            if (text != "")
-              deleteUsername = true;
-            else
-              deleteUsername = false;
-          });
-        },
-        controller: _usernameControl,
-        decoration: InputDecoration(
-          prefixIcon: Icon(Icons.person_outline),
-          suffixIcon: deleteUsername
-              ? IconButton(
-                  onPressed: () {
-                    _usernameControl.text = "";
-                    setState(() {
-                      deleteUsername = false;
-                    });
-                  },
-                  icon: Icon(
-                    Icons.backspace,
-                  ),
-                  color: Colors.grey,
-                )
-              : null,
-          enabledBorder:
-              OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
-          border: OutlineInputBorder(),
-          labelText: "Username",
-          labelStyle: TextStyle(
-            fontFamily: "Nunito",
+        data: ThemeData(primaryColor: global.blue),
+        child: TextField(
+          onChanged: (text) {
+            setState(() {
+              if (text != "")
+                deleteUsername = true;
+              else
+                deleteUsername = false;
+            });
+          },
+          controller: _usernameControl,
+          decoration: InputDecoration(
+            // prefixIcon: Icon(Icons.person_outline),
+            suffixIcon: deleteUsername
+                ? IconButton(
+                    onPressed: () {
+                      _usernameControl.text = "";
+                      setState(() {
+                        deleteUsername = false;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.backspace,
+                    ),
+                    color: Colors.grey,
+                  )
+                : null,
+            // enabledBorder:
+            // OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
+            // border: OutlineInputBorder(),
+            labelText: "Username",
+            labelStyle: TextStyle(
+              fontSize: 14.0,
+            ),
+            errorText:
+                validateUsernameEmpty ? "Username cannot be empty" : null,
           ),
-          errorText: validateUsernameEmpty ? "Username cannot be empty" : null,
-        ),
-      )
-    );
+        ));
 
 //! //////////////////////////// Password Text Field ////////////////////////////
     final Widget passwordTextField = Theme(
@@ -166,29 +189,30 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
                       },
                     )
                   : null,
-              prefixIcon: Icon(Icons.lock_outline),
-              enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: global.blue)),
-              fillColor: global.blue,
-              border: OutlineInputBorder(),
+              // prefixIcon: Icon(Icons.lock_outline),
+              // enabledBorder: OutlineInputBorder(
+              // borderSide: BorderSide(color: global.blue)),
+              //border: OutlineInputBorder(),
               labelText: "Password",
               labelStyle: TextStyle(
-                fontFamily: "Nunito",
+                fontSize: 14.0,
               ),
-              errorText: validatePasswordEmpty ? "Password cannot be empty" : null,
+              errorText:
+                  validatePasswordEmpty ? "Password cannot be empty" : null,
             )));
 
 //! //////////////////////////// Login Button ////////////////////////////
     final Widget loginButton = Container(
         decoration: BoxDecoration(
-          gradient: global.blueButtonGradient,
-          borderRadius: BorderRadius.circular(28.0),
+          gradient: global.blueGradient,
+          borderRadius: BorderRadius.circular(global.phoneHeight * 0.045),
           boxShadow: [
             BoxShadow(
                 color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
           ],
         ),
-        height: 56.0,
+        width: global.phoneWidth * 0.6,
+        height: global.phoneHeight * 0.09,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -203,72 +227,129 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin{
                 setState(() {
                   loading = true;
                 });
-                login(_usernameControl.text, _passwordControl.text);
+                //TODO login(_usernameControl.text, _passwordControl.text);
                 print("Login clicked!");
               }
             },
-            borderRadius: BorderRadius.circular(28.0),
+            borderRadius: BorderRadius.circular(global.phoneHeight * 0.045),
             child: Center(
               child: Center(
-                child: !loading ? Text(
-                  "Login!",
-                  style: TextStyle(
-                    fontFamily: "Nunito",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ) : CircularProgressIndicator(),
+                child: !loading
+                    ? Text(
+                        "Login",
+                        style: TextStyle(
+                          fontFamily: "Nunito",
+                          fontSize: 18.0,
+                          color: Colors.white,
+                        ),
+                      )
+                    : SizedBox(
+                        height: global.phoneHeight * 0.03,
+                        width: global.phoneHeight * 0.03,
+                        child: Theme(
+                          data: Theme.of(context)
+                              .copyWith(accentColor: Colors.white),
+                          child: CircularProgressIndicator(strokeWidth: 3.0,),
+                        ),
+                      ),
               ),
             ),
           ),
-        ));
+        )
+      );
 
 //! //////////////////////////// return Page ////////////////////////////
     return Scaffold(
-      resizeToAvoidBottomPadding: true,
+      resizeToAvoidBottomInset: true,
       backgroundColor: global.backgroundWhite,
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.symmetric(horizontal: 24.0),
+      body: SingleChildScrollView(
+        child: Stack(
+          alignment: Alignment.topCenter,
           children: <Widget>[
-            logo,
-            SizedBox(
-              height: 16.0,
+            Container(
+              height: global.phoneHeight,
+              width: global.phoneWidth,
             ),
-            usernameTextField,
-            SizedBox(
-              height: 16.0,
+            Container(
+                height: global.phoneHeight * 0.5,
+                width: global.phoneWidth,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 5.0,
+                      offset: const Offset(5.0, 0.0),
+                      color: Colors.grey,
+                    )
+                  ],
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF78B5FA), Color(0xFF9586FD)],
+                    end: Alignment.topCenter,
+                    begin: Alignment.bottomCenter,
+                  ),
+                )),
+            Positioned(
+              top: global.phoneHeight * 0.15,
+              height: global.phoneHeight * 0.2,
+              width: global.phoneHeight * 0.2,
+              child: FlutterLogo(),
             ),
-            passwordTextField,
-            SizedBox(
-              height: 24.0,
+            Positioned(
+              top: global.phoneHeight * 0.4,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: <Widget>[
+                  Container(
+                    height: global.phoneHeight * 0.45,
+                    width: global.phoneWidth * 0.8,
+                  ), 
+                  SizedBox(
+                    width: global.phoneWidth * 0.8,
+                    height: global.phoneHeight * 0.405,
+                    child: Material(
+                      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+                      color: Theme.of(context).cardColor,
+                      elevation: 2.0,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 32.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Expanded(
+                              flex: 2,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 28.0),
+                                child: Text("Welcome!", 
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "Nunito",
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: usernameTextField,
+                            ),
+                            Expanded(
+                              flex: 4,
+                              child: passwordTextField,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0.0,
+                    child: loginButton,
+                  ),
+                ],
+              ),
             ),
-            loginButton,
           ],
         ),
       ),
     );
   }
-}
-
-void _showDialog(BuildContext context, String str) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(str),
-        content: Text(""),
-        actions: <Widget>[
-           FlatButton(
-            child: Text("Close"),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
 }
