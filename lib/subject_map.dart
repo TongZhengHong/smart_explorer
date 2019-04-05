@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 
 double screenWidth;
 
+List chapData;
+
 List<double> activity_positions = [
   /*235.0,
   162.0,
@@ -32,9 +34,8 @@ class SubjectMapState extends State<SubjectMap> {
   ScrollController _scroll = ScrollController();
   int idx = global.subindex;
   bool _loading = true;
-  List chapData;
 
-  Future<String> getChapData() async {
+  /*Future<String> getChapData() async {
     print("Request sent!");
     print(global.cookie);
     final String mapUrl =
@@ -64,7 +65,7 @@ class SubjectMapState extends State<SubjectMap> {
       print("Error!");
       return "Error!";
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +149,7 @@ class SubjectMapState extends State<SubjectMap> {
   @override
   void initState() {
     super.initState();
-    this.getChapData();
+    //this.getChapData();
   }
 
   Widget _drawCircle(bool mainCheck, double diameter, int position) {

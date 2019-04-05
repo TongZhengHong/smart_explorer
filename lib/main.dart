@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -6,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
-import 'package:smart_explorer/subject_map.dart';
+import 'package:smart_explorer/subject_map.dart' as subject_map;
 import 'package:smart_explorer/subject_popup.dart';
 import 'package:smart_explorer/settings.dart';
 import 'package:smart_explorer/profile.dart';
@@ -16,7 +17,8 @@ import 'package:http/http.dart' as http;
 
 //!Run splash screen on load!
 void main() {
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
     runApp(Splash());
   });
 }
@@ -32,6 +34,40 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   //var _context;
+
+  bool loading = false;
+
+  Future<String> getChapData() async {
+    print("Request sent!");
+    print(global.cookie);
+    final String mapUrl =
+        "https://tinypingu.infocommsociety.com/api/exploremap";
+    final response =
+        await http.post(mapUrl, headers: {"Cookie": global.cookie});
+
+    if (response.statusCode == 200) {
+      final responseArr = json.decode(response.body);
+      responseArr.forEach((subject) {
+        subject_map.chapData = subject["children"];
+        print(subject_map.chapData);
+        subject_map.activity_positions = [];
+        final random = new Random();
+        print(subject.map_chapData[0]["children"].length);
+        subject_map.chapData[0]["children"].forEach((activity) {
+          int padding = random.nextInt(global.phoneWidth.toInt()-36);
+          subject_map.activity_positions.add(padding.toDouble());
+        });
+      }); //This is to get the first subject which is Econs
+
+      setState(() {
+        loading = false;
+      });
+      return "Success!";
+    } else {
+      print("Error!");
+      return "Error!";
+    }
+  }
 
   void _select(Choice choice) async {
     print(choice.title);
@@ -59,8 +95,8 @@ class MainPageState extends State<MainPage> {
       String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
       print("Student ID: " + global.studentID);
       print("Cookie: " + global.cookie);
-      await http.post(url,
-          headers: {"cookie": global.cookie}).then((dynamic response) {
+      await http.post(url, headers: {"cookie": global.cookie}).then(
+          (dynamic response) {
         if (response.statusCode == 200) {
           print("Successful Data Transfer");
           Post temp = Post.fromJson(json.decode(response.body));
@@ -84,6 +120,60 @@ class MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final Widget exploreButton = Container(
+      decoration: BoxDecoration(
+        gradient: global.blueButtonGradient,
+        borderRadius: BorderRadius.circular(4.0),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
+        ],
+      ),
+      width: global.phoneWidth - 64.0, //Minus the padding of 32.0px on both sides
+      height: 56.0,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState((){
+              loading = true;
+            });
+            getChapData();
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) { 
+                return subject_map.SubjectMap();
+              }),
+            );
+          },
+          borderRadius: BorderRadius.circular(4.0),
+          child: Center(
+            child: Center(
+              child: !loading
+                ? Text(
+                    "Explore!",
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  )
+                : SizedBox(
+                    height: global.phoneHeight * 0.03,
+                    width: global.phoneHeight * 0.03,
+                    child: Theme(
+                      data: Theme.of(context)
+                          .copyWith(accentColor: Colors.white),
+                      child: CircularProgressIndicator(strokeWidth: 3.0,),
+                    ),
+                  ),
+            ),
+          ),
+        ),
+      )
+    );
+
     return Scaffold(
       backgroundColor: global.backgroundWhite,
       body: PageView(
@@ -98,8 +188,7 @@ class MainPageState extends State<MainPage> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: global.createGradientButton(global.blueGradient, 56,
-          global.phoneWidth * 0.5, context, SubjectMap(), "Explore!"),
+      floatingActionButton: exploreButton,
       bottomNavigationBar: BottomAppBar(
         elevation: 10.0,
         color: global.appBarLightBlue,
@@ -153,11 +242,11 @@ class ExpandableCardState extends State<ExpandableCard> {
   double maxCardHeight = global.phoneHeight * 0.75;
   double minCardHeight = global.phoneHeight * 0.4;
   double cardHeight = global.phoneHeight * 0.4;
-  
+
   double initialCardHeight = global.phoneHeight * 0.3;
   double startPosition;
   double position;
-
+  
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
@@ -165,17 +254,20 @@ class ExpandableCardState extends State<ExpandableCard> {
         child: Align(
             alignment: FractionalOffset.topCenter,
             child: Container(
-              padding: EdgeInsets.only(top: 128.0),
-              child: Theme(
-                data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-                child: CircularProgressIndicator(backgroundColor: Colors.yellow, strokeWidth: 10.0,),
-              )
-              
-              // child: CircleAvatar(
-              //   backgroundColor: Colors.redAccent,
-              //   radius: 72.0,
-              // ),
-            )),
+                padding: EdgeInsets.only(top: 128.0),
+                child: Theme(
+                  data: Theme.of(context).copyWith(accentColor: Colors.yellow),
+                  child: CircularProgressIndicator(
+                    backgroundColor: Colors.yellow,
+                    strokeWidth: 10.0,
+                  ),
+                )
+
+                // child: CircleAvatar(
+                //   backgroundColor: Colors.redAccent,
+                //   radius: 72.0,
+                // ),
+                )),
       ),
       Positioned(
         child: AppBar(
