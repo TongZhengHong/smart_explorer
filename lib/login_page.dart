@@ -69,8 +69,8 @@ class LoginPageState extends State<LoginPage> {
         await prefs.setStringList("AuthDetails", info);
         await prefs.setString(global.pref_cookie, global.cookie);
 
-        // Route route = MaterialPageRoute(builder: (context) => MainPage());
-        // Navigator.pushReplacement(context, route);
+        Route route = MaterialPageRoute(builder: (context) => MainPage());
+        Navigator.pushReplacement(context, route);
       } else if (response.statusCode == 400) {
         loading = false;
         _showDialog("Wrong Username or Password!");
@@ -120,10 +120,11 @@ class LoginPageState extends State<LoginPage> {
 
 //! //////////////////////////// Username Text Field ////////////////////////////
     final Widget usernameTextField = Theme(
-        data: ThemeData(primaryColor: global.blue),
+        data: ThemeData(primaryColor: Colors.black38),
         child: TextField(
           onChanged: (text) {
             setState(() {
+              validateUsernameEmpty = false;
               if (text != "")
                 deleteUsername = true;
               else
@@ -132,7 +133,6 @@ class LoginPageState extends State<LoginPage> {
           },
           controller: _usernameControl,
           decoration: InputDecoration(
-            // prefixIcon: Icon(Icons.person_outline),
             suffixIcon: deleteUsername
                 ? IconButton(
                     onPressed: () {
@@ -147,26 +147,30 @@ class LoginPageState extends State<LoginPage> {
                     color: Colors.grey,
                   )
                 : null,
-            // enabledBorder:
-            // OutlineInputBorder(borderSide: BorderSide(color: global.blue)),
-            // border: OutlineInputBorder(),
+            fillColor: Colors.black26,
             labelText: "Username",
             labelStyle: TextStyle(
-              fontSize: 14.0,
+              fontSize: 16.0,
+              fontWeight: FontWeight.w500
             ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: global.blue, width: 3.0),
+            ),
+            focusedErrorBorder: UnderlineInputBorder(),
             errorText:
-                validateUsernameEmpty ? "Username cannot be empty" : null,
+                validateUsernameEmpty ? "Can't be empty" : null,
           ),
         ));
 
 //! //////////////////////////// Password Text Field ////////////////////////////
     final Widget passwordTextField = Theme(
         data: ThemeData(
-          primaryColor: global.blue,
+          primaryColor: Colors.black38,
         ),
         child: TextField(
             onChanged: (text) {
               setState(() {
+                validatePasswordEmpty = false;
                 if (text != "")
                   showPasswordIcon = true;
                 else
@@ -189,30 +193,32 @@ class LoginPageState extends State<LoginPage> {
                       },
                     )
                   : null,
-              // prefixIcon: Icon(Icons.lock_outline),
-              // enabledBorder: OutlineInputBorder(
-              // borderSide: BorderSide(color: global.blue)),
-              //border: OutlineInputBorder(),
+              fillColor: Colors.black38,
               labelText: "Password",
               labelStyle: TextStyle(
-                fontSize: 14.0,
+                fontSize: 16.0,
+                fontWeight: FontWeight.w500,
               ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: global.blue, width: 3.0),
+              ),
+              focusedErrorBorder: UnderlineInputBorder(),
               errorText:
-                  validatePasswordEmpty ? "Password cannot be empty" : null,
+                  validatePasswordEmpty ? "Can't be empty" : null,
             )));
 
 //! //////////////////////////// Login Button ////////////////////////////
     final Widget loginButton = Container(
         decoration: BoxDecoration(
-          gradient: global.blueGradient,
-          borderRadius: BorderRadius.circular(global.phoneHeight * 0.045),
+          gradient: global.blueButtonGradient,
+          borderRadius: BorderRadius.circular(4.0),
           boxShadow: [
             BoxShadow(
-                color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
+                color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
           ],
         ),
-        width: global.phoneWidth * 0.6,
-        height: global.phoneHeight * 0.09,
+        width: global.phoneWidth - 64.0, //Minus the padding of 32.0px on both sides
+        height: 56.0,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -227,19 +233,19 @@ class LoginPageState extends State<LoginPage> {
                 setState(() {
                   loading = true;
                 });
-                //TODO login(_usernameControl.text, _passwordControl.text);
+                login(_usernameControl.text, _passwordControl.text);
                 print("Login clicked!");
               }
             },
-            borderRadius: BorderRadius.circular(global.phoneHeight * 0.045),
+            borderRadius: BorderRadius.circular(4.0),
             child: Center(
               child: Center(
                 child: !loading
                     ? Text(
-                        "Login",
+                        "SIGN IN",
                         style: TextStyle(
-                          fontFamily: "Nunito",
-                          fontSize: 18.0,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
                       )
@@ -263,92 +269,58 @@ class LoginPageState extends State<LoginPage> {
       resizeToAvoidBottomInset: true,
       backgroundColor: global.backgroundWhite,
       body: SingleChildScrollView(
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: <Widget>[
-            Container(
-              height: global.phoneHeight,
-              width: global.phoneWidth,
-            ),
-            Container(
-                height: global.phoneHeight * 0.5,
-                width: global.phoneWidth,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 5.0,
-                      offset: const Offset(5.0, 0.0),
-                      color: Colors.grey,
-                    )
-                  ],
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF78B5FA), Color(0xFF9586FD)],
-                    end: Alignment.topCenter,
-                    begin: Alignment.bottomCenter,
-                  ),
-                )),
-            Positioned(
-              top: global.phoneHeight * 0.15,
-              height: global.phoneHeight * 0.2,
-              width: global.phoneHeight * 0.2,
-              child: FlutterLogo(),
-            ),
-            Positioned(
-              top: global.phoneHeight * 0.4,
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  Container(
-                    height: global.phoneHeight * 0.45,
-                    width: global.phoneWidth * 0.8,
-                  ), 
-                  SizedBox(
-                    width: global.phoneWidth * 0.8,
-                    height: global.phoneHeight * 0.405,
-                    child: Material(
-                      borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      color: Theme.of(context).cardColor,
-                      elevation: 2.0,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 32.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Expanded(
-                              flex: 2,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 28.0),
-                                child: Text("Welcome!", 
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: "Nunito",
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: usernameTextField,
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: passwordTextField,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0.0,
-                    child: loginButton,
-                  ),
-                ],
+        child: Container(
+          width: global.phoneWidth,
+          height: global.phoneHeight,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              // SizedBox(
+              //   height: global.phoneHeight * 0.05,
+              // ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: 32.0),
+              //   child: Text("Studious", style: TextStyle(fontFamily: "CarterOne", fontSize: 20.0),),
+              // ),
+              SizedBox(
+                height: global.phoneHeight * 0.3,
               ),
-            ),
-          ],
-        ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.0),
+                child: Text("Welcome Back!", style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800)),
+              ),
+              SizedBox(
+                height: 12.0,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.0),
+                child: Text("There is a lot to learn", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w900, color: Colors.black38),),
+              ),
+              SizedBox(
+                height: global.phoneHeight * 0.1,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.0),
+                child: usernameTextField,
+              ),
+              SizedBox(
+                height: global.phoneHeight * 0.03,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.0),
+                child: passwordTextField,
+              ),
+              SizedBox(
+                height: global.phoneHeight * 0.15,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.0),
+                child: loginButton,
+              )
+            ],
+          ),
+        )
       ),
     );
   }
