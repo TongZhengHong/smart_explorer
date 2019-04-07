@@ -74,11 +74,12 @@ class SubjectMapState extends State<SubjectMap> {
       appBar: AppBar(
         title: Text(global.subjects[idx]),
       ),
-      body: _loading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
+      body: 
+      //_loading
+          //? Center(
+          //    child: CircularProgressIndicator(),
+          //  )
+           ListView.builder(
               controller: _scroll,
               itemCount: activity_positions.length,
               itemBuilder: (context, i) {

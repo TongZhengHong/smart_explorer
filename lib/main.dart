@@ -64,7 +64,7 @@ class MainPageState extends State<MainPage> {
       });
       return "Success!";
     } else {
-      print("Error!");
+      print("Error! Subject data not retrieved!");
       return "Error!";
     }
   }
@@ -138,8 +138,9 @@ class MainPageState extends State<MainPage> {
           onTap: () {
             setState((){
               loading = true;
+              //super.initState();
+              this.getChapData();
             });
-            getChapData();
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) { 
