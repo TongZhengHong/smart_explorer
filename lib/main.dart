@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -14,6 +15,13 @@ import 'package:smart_explorer/profile.dart';
 
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
+
+/* Architeture of main.dart:
+  getChapData --> Prepare data for explore map
+  getPageInfo --> Get info for the subjects (like Econs, Computing etc.)
+  build --> Main build
+  select --> Popup menu options
+*/
 
 //!Run splash screen on load!
 void main() {
@@ -38,21 +46,16 @@ class MainPageState extends State<MainPage> {
   bool loading = false;
 
   Future<String> getChapData() async {
-    print("Request sent!");
-    print(global.cookie);
-    final String mapUrl =
-        "https://tinypingu.infocommsociety.com/api/exploremap";
-    final response =
-        await http.post(mapUrl, headers: {"Cookie": global.cookie});
+    final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
+    final response = await http.post(mapUrl, headers: {"Cookie": global.cookie});
 
     if (response.statusCode == 200) {
       final responseArr = json.decode(response.body);
       responseArr.forEach((subject) {
         subject_map.chapData = subject["children"];
-        print(subject_map.chapData);
         subject_map.activity_positions = [];
+
         final random = new Random();
-        print(subject.map_chapData[0]["children"].length);
         subject_map.chapData[0]["children"].forEach((activity) {
           int padding = random.nextInt(global.phoneWidth.toInt()-36);
           subject_map.activity_positions.add(padding.toDouble());
@@ -64,47 +67,27 @@ class MainPageState extends State<MainPage> {
       });
       return "Success!";
     } else {
-      print("Error! Subject data not retrieved!");
+      print("Main: Error! Subject data not retrieved!");
       return "Error!";
     }
   }
 
-  void _select(Choice choice) async {
-    print(choice.title);
-    if (choice.title == "Log out") {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      global.studentID = "";
-      global.cookie = "";
-      await prefs.setStringList(global.auth_details, []);
-      await prefs.setString(global.pref_cookie, global.cookie);
-
-      Route route = MaterialPageRoute(builder: (context) => LoginPage());
-      Navigator.pushReplacement(context, route);
-    } else if (choice.title == "Profile") {
-      Route route = MaterialPageRoute(builder: (context) => ProfilePage());
-      Navigator.push(context, route);
-    } else if (choice.title == "Settings") {
-      Route route = MaterialPageRoute(builder: (context) => SettingsPage());
-      Navigator.push(context, route);
-    }
-    return;
-  }
-
-  Widget _buildPage({int index}) {
-    void update(int index) async {
+  @override
+  Widget build(BuildContext context) {
+    Future<dynamic> getPageInfo() async {
       String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
-      print("Student ID: " + global.studentID);
-      print("Cookie: " + global.cookie);
       await http.post(url, headers: {"cookie": global.cookie}).then(
           (dynamic response) {
         if (response.statusCode == 200) {
-          print("Successful Data Transfer");
-          Post temp = Post.fromJson(json.decode(response.body));
-          global.overallProgress[index] = temp.overallProgress;
-          global.totalScore[index] = temp.tScore;
-          print("Break");
+          print("Main: Retrieved page info!");
+          final responseMap = json.decode(response.body);
+          final subjectArr = responseMap["subjects"];
+          subjectArr.forEach((subject) {
+            
+          });
+
         } else {
-          print("Error when retrieving page info");
+          print("Main: Error when retrieving page info");
           global.studentID = "";
           global.cookie = "";
           // Route route = MaterialPageRoute(builder: (context) => LoginPage());
@@ -112,14 +95,7 @@ class MainPageState extends State<MainPage> {
         }
       });
     }
-
-    update(index);
-    print("Testing: " + global.overallProgress[index].toString());
-    return ExpandableCard(index);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    getPageInfo();
 
     final Widget exploreButton = Container(
       decoration: BoxDecoration(
@@ -147,7 +123,7 @@ class MainPageState extends State<MainPage> {
                 return subject_map.SubjectMap();
               }),
             );
-          },
+          },  //OnTap
           borderRadius: BorderRadius.circular(4.0),
           child: Center(
             child: Center(
@@ -182,10 +158,10 @@ class MainPageState extends State<MainPage> {
           global.subindex = index;
         },
         children: [
-          _buildPage(index: 0),
-          _buildPage(index: 1),
-          _buildPage(index: 2),
-          _buildPage(index: 3),
+          ExpandableCard(0),
+          ExpandableCard(1),
+          ExpandableCard(2),
+          ExpandableCard(3),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -204,7 +180,7 @@ class MainPageState extends State<MainPage> {
                   Icons.more_vert,
                   color: Colors.blueGrey.shade500,
                 ),
-                onSelected: _select,
+                onSelected: select,
                 //offset: Offset(0, -120),
                 itemBuilder: (BuildContext context) {
                   return choices.map((Choice choice) {
@@ -220,6 +196,26 @@ class MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+
+  void select(Choice choice) async {
+    if (choice.title == "Log out") {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      global.studentID = "";
+      global.cookie = "";
+      await prefs.setStringList(global.auth_details, []);
+      await prefs.setString(global.pref_cookie, global.cookie);
+
+      Route route = MaterialPageRoute(builder: (context) => LoginPage());
+      Navigator.pushReplacement(context, route);
+    } else if (choice.title == "Profile") {
+      Route route = MaterialPageRoute(builder: (context) => ProfilePage());
+      Navigator.push(context, route);
+    } else if (choice.title == "Settings") {
+      Route route = MaterialPageRoute(builder: (context) => SettingsPage());
+      Navigator.push(context, route);
+    }
+    return;
   }
 }
 
@@ -256,18 +252,10 @@ class ExpandableCardState extends State<ExpandableCard> {
             alignment: FractionalOffset.topCenter,
             child: Container(
                 padding: EdgeInsets.only(top: 128.0),
-                child: Theme(
-                  data: Theme.of(context).copyWith(accentColor: Colors.yellow),
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.yellow,
-                    strokeWidth: 10.0,
-                  ),
-                )
-
-                // child: CircleAvatar(
-                //   backgroundColor: Colors.redAccent,
-                //   radius: 72.0,
-                // ),
+                child: CircleAvatar(
+                  backgroundColor: Colors.redAccent,
+                  radius: 72.0,
+                ),
                 )),
       ),
       Positioned(
@@ -391,20 +379,6 @@ class ExpandableCardState extends State<ExpandableCard> {
         ),
       ),
     ]);
-  }
-}
-
-class Post {
-  final double overallProgress;
-  final int tScore;
-
-  Post({this.overallProgress, this.tScore});
-
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      overallProgress: json['percent'],
-      tScore: json['score'],
-    );
   }
 }
 

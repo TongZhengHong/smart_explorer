@@ -12,20 +12,6 @@ class LoginPage extends StatefulWidget {
   }
 }
 
-class Post {
-  final String name;
-  final String email;
-
-  Post({this.name, this.email});
-
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      name: json['Name'],
-      email: json['Email'],
-    );
-  }
-}
-
 class LoginPageState extends State<LoginPage> {
   bool validateUsernameEmpty = false;
   bool validatePasswordEmpty = false;
@@ -43,21 +29,19 @@ class LoginPageState extends State<LoginPage> {
 
   void login(String username, String password) async {
     String url = 'https://tinypingu.infocommsociety.com/api/login2';
-    await http
-        .post(url, body: {"username": username, "password": password}).then(
+    await http.post(url, body: {"username": username, "password": password}).then(
             (dynamic response) async {
       if (response.statusCode == 200) {
         loading = false;
-        print("Successful Login");
         global.studentID = username;
         String rawCookie = response.headers['set-cookie'];
         int index = rawCookie.indexOf(';');
 
         global.cookie =
             (index == -1) ? rawCookie : rawCookie.substring(0, index);
-        Post temp = new Post.fromJson(json.decode(response.body));
-        global.studentName = temp.name;
-        global.studentEmail = temp.email;
+        final responseMap = json.decode(response.body);
+        global.studentName = responseMap["Name"];
+        global.studentEmail = responseMap["Email"];
 
         List<String> info = [
           global.studentID,
@@ -74,10 +58,10 @@ class LoginPageState extends State<LoginPage> {
       } else if (response.statusCode == 400) {
         loading = false;
         _showDialog("Wrong Username or Password!");
-        print("Wrong Username or Password!");
+        print("Login: Wrong Username or Password!");
       } else {
         _showDialog("Unexpected login error. Please check your network");
-        print("Unexpected login error");
+        print("Login: Unexpected login error");
       }
     });
   }
@@ -234,7 +218,6 @@ class LoginPageState extends State<LoginPage> {
                   loading = true;
                 });
                 login(_usernameControl.text, _passwordControl.text);
-                print("Login clicked!");
               }
             },
             borderRadius: BorderRadius.circular(4.0),

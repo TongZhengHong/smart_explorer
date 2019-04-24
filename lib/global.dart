@@ -11,8 +11,10 @@ List<String> subjects = ["H2 Economics", "H2 Math", "H2 Chemistry", "H2 Physics"
 String studentID = "";
 String studentName = "";
 String studentEmail = "";
+
 List<double> overallProgress = [0,0,0,0];
 List<int> totalScore = [0,0,0,0];
+
 String cookie = "";
 
 //! Shared Preferences key values
