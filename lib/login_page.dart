@@ -1,9 +1,36 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:smart_explorer/internet.dart';
 import 'package:smart_explorer/main.dart';
 import 'package:smart_explorer/global.dart' as global;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+
+class Todo {
+  String studentID;
+  String studentClass;
+  String username;
+  String name;
+  String email;
+  Map activityProgress;
+  List<dynamic> subjects;
+  List<dynamic> submissions;
+  String _id;
+
+  Todo(response){
+    this.studentID = response["studentID"];
+    this.studentClass = response["studentClass"];
+    this.username = response["username"];
+    this.name = response["name"];
+    this.email = response["email"];
+    this.activityProgress = response["activityProgress"];
+    this.subjects = response["subjects"]; 
+    this.submissions = response["submissions"]; 
+    this._id = response["_id"];
+   }
+}
 
 class LoginPage extends StatefulWidget {
   @override
@@ -21,18 +48,64 @@ class LoginPageState extends State<LoginPage> {
   bool showPasswordIcon = false;
 
   bool loading = false;
+  bool isOffline = false;
 
   BuildContext _context;
 
   final _usernameControl = TextEditingController();
   final _passwordControl = TextEditingController();
 
+  StreamSubscription _connectionChangeStream;
+  ConnectionStatusSingleton connectionStatus;
+
+  @override
+  initState() {
+    super.initState();
+    connectionStatus = ConnectionStatusSingleton.getInstance();
+    _connectionChangeStream = connectionStatus.connectionChange.listen(connectionChanged);
+  }
+
+  void connectionChanged(dynamic hasConnection) {
+    // setState(() {
+    //   isOffline = !hasConnection;
+    // });
+  }
+
+  void getPageInfo() async {
+    String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
+    await http.post(url, headers: {"cookie": global.cookie}).then(
+        (dynamic response) async {
+      if (response.statusCode == 200) {
+        print("Login: Retrieved page info!");
+        final responseMap = json.decode(response.body);
+        
+        print("Login: SUCCESS");
+        Route route = MaterialPageRoute(builder: (context) => MainPage(todo: Todo(responseMap)));
+        Navigator.pushReplacement(context, route);
+
+      } else {
+        setState(() {
+          loading = false;
+        });
+        print("Login: Error when retrieving page info");
+        _showDialog("Unexpected login error. Please check your network");
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList("AuthDetails", []);
+        await prefs.setString(global.pref_cookie, global.cookie);
+
+        global.studentID = "";
+        global.cookie = "";
+      }
+    });
+  }
+
   void login(String username, String password) async {
     String url = 'https://tinypingu.infocommsociety.com/api/login2';
     await http.post(url, body: {"username": username, "password": password}).then(
             (dynamic response) async {
       if (response.statusCode == 200) {
-        loading = false;
+        print("Login: Correct username & password");
         global.studentID = username;
         String rawCookie = response.headers['set-cookie'];
         int index = rawCookie.indexOf(';');
@@ -52,14 +125,20 @@ class LoginPageState extends State<LoginPage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setStringList("AuthDetails", info);
         await prefs.setString(global.pref_cookie, global.cookie);
-
-        Route route = MaterialPageRoute(builder: (context) => MainPage());
-        Navigator.pushReplacement(context, route);
+        
+        //Request for subject information of the student
+        getPageInfo();
+        
       } else if (response.statusCode == 400) {
-        loading = false;
+        setState(() {
+          loading = false;
+        });
         _showDialog("Wrong Username or Password!");
         print("Login: Wrong Username or Password!");
       } else {
+        setState(() {
+          loading = false;
+        });
         _showDialog("Unexpected login error. Please check your network");
         print("Login: Unexpected login error");
       }
@@ -96,11 +175,6 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     _context = context;
-    final logo = CircleAvatar(
-      backgroundColor: Colors.transparent,
-      radius: 64.0,
-      child: Image.asset('images/vs_code.png'),
-    );
 
 //! //////////////////////////// Username Text Field ////////////////////////////
     final Widget usernameTextField = Theme(
@@ -134,11 +208,10 @@ class LoginPageState extends State<LoginPage> {
             fillColor: Colors.black26,
             labelText: "Username",
             labelStyle: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.w500
+              fontSize: 14.0,
             ),
             focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: global.blue, width: 3.0),
+              borderSide: BorderSide(color: global.blue),
             ),
             focusedErrorBorder: UnderlineInputBorder(),
             errorText:
@@ -180,11 +253,10 @@ class LoginPageState extends State<LoginPage> {
               fillColor: Colors.black38,
               labelText: "Password",
               labelStyle: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w500,
+                fontSize: 14.0,
               ),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: global.blue, width: 3.0),
+                borderSide: BorderSide(color: global.blue),
               ),
               focusedErrorBorder: UnderlineInputBorder(),
               errorText:
@@ -271,14 +343,14 @@ class LoginPageState extends State<LoginPage> {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 32.0),
-                child: Text("Welcome Back!", style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800)),
+                child: Text("Hello there!", style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.w800)),
               ),
               SizedBox(
                 height: 12.0,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 32.0),
-                child: Text("There is a lot to learn", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w900, color: Colors.black38),),
+                child: Text("Explore the endless possibilities...", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w900, color: Colors.black38),),
               ),
               SizedBox(
                 height: global.phoneHeight * 0.1,

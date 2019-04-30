@@ -18,8 +18,8 @@ List<int> totalScore = [0,0,0,0];
 String cookie = "";
 
 //! Shared Preferences key values
-String pref_cookie = "cookie";
-String auth_details = "AuthDetails";
+String pref_cookie = "cookie";        //Just purely cookie
+String auth_details = "AuthDetails";  //Includes studentID, Name and Email
 
 //! Parameters
 double phoneHeight = 0.0;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_explorer/internet.dart';
 
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
@@ -16,17 +17,19 @@ import 'package:smart_explorer/profile.dart';
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
 
-/* Architeture of main.dart:
-  getChapData --> Prepare data for explore map
-  getPageInfo --> Get info for the subjects (like Econs, Computing etc.)
-  build --> Main build
-  select --> Popup menu options
-*/
+/*
+ * Architeture of main.dart:
+ * getChapData --> Prepare data for explore map
+ * build --> Main build
+ * select --> Popup menu options
+ */
 
 //!Run splash screen on load!
 void main() {
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
+  ConnectionStatusSingleton connectionStatus = ConnectionStatusSingleton.getInstance();
+  connectionStatus.initialize();
+
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
     runApp(Splash());
   });
 }
@@ -34,6 +37,10 @@ void main() {
 const timeout = const Duration(seconds: 5);
 
 class MainPage extends StatefulWidget {
+  final Todo todo;
+
+  MainPage({Key key, @required this.todo}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return MainPageState();
@@ -41,11 +48,10 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  //var _context;
-
+  
   bool loading = false;
 
-  Future<String> getChapData() async {
+  void getChapData() async {
     final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
     final response = await http.post(mapUrl, headers: {"Cookie": global.cookie});
 
@@ -65,57 +71,36 @@ class MainPageState extends State<MainPage> {
       setState(() {
         loading = false;
       });
-      return "Success!";
     } else {
       print("Main: Error! Subject data not retrieved!");
-      return "Error!";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    Future<dynamic> getPageInfo() async {
-      String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
-      await http.post(url, headers: {"cookie": global.cookie}).then(
-          (dynamic response) {
-        if (response.statusCode == 200) {
-          print("Main: Retrieved page info!");
-          final responseMap = json.decode(response.body);
-          final subjectArr = responseMap["subjects"];
-          subjectArr.forEach((subject) {
-            
-          });
+    Todo todo = widget.todo;
+    
+    print("Main: Todo");
+    print(todo.subjects.length);
 
-        } else {
-          print("Main: Error when retrieving page info");
-          global.studentID = "";
-          global.cookie = "";
-          // Route route = MaterialPageRoute(builder: (context) => LoginPage());
-          // Navigator.pushReplacement(context, route);
-        }
-      });
-    }
-    getPageInfo();
-
+//! //////////////////////////// Explore Button ////////////////////////////
     final Widget exploreButton = Container(
       decoration: BoxDecoration(
         gradient: global.blueButtonGradient,
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadius.circular(24.0),
         boxShadow: [
           BoxShadow(
               color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
         ],
       ),
-      width: global.phoneWidth - 64.0, //Minus the padding of 32.0px on both sides
-      height: 56.0,
+      width: global.phoneWidth * 0.6, //Minus the padding of 32.0px on both sides
+      height: 48.0,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
             setState((){
               loading = true;
-              //super.initState();
-              this.getChapData();
             });
             Navigator.push(
               context,
@@ -124,16 +109,17 @@ class MainPageState extends State<MainPage> {
               }),
             );
           },  //OnTap
-          borderRadius: BorderRadius.circular(4.0),
+          borderRadius: BorderRadius.circular(24.0),
           child: Center(
             child: Center(
               child: !loading
                 ? Text(
                     "Explore!",
                     style: TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 16.0,
+                      //fontWeight: FontWeight.w700,
                       color: Colors.white,
+                      fontFamily: "CarterOne"
                     ),
                   )
                 : SizedBox(
@@ -153,16 +139,14 @@ class MainPageState extends State<MainPage> {
 
     return Scaffold(
       backgroundColor: global.backgroundWhite,
-      body: PageView(
+      body: PageView.builder(
         onPageChanged: (index) {
           global.subindex = index;
         },
-        children: [
-          ExpandableCard(0),
-          ExpandableCard(1),
-          ExpandableCard(2),
-          ExpandableCard(3),
-        ],
+        itemCount: todo.subjects.length,
+        itemBuilder: (context, i) {
+          return ExpandableCard(i, todo);
+        }
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: exploreButton,
@@ -221,7 +205,9 @@ class MainPageState extends State<MainPage> {
 
 class ExpandableCard extends StatefulWidget {
   final int index;
-  ExpandableCard(this.index);
+  final Todo todo;
+
+  ExpandableCard(this.index, this.todo);
 
   @override
   State<StatefulWidget> createState() {
@@ -271,8 +257,8 @@ class ExpandableCardState extends State<ExpandableCard> {
                 "Studious",
                 style: TextStyle(
                     color: Colors.black,
-                    fontFamily: "Audiowide",
-                    fontSize: 20.0),
+                    fontFamily: "CarterOne",
+                    fontSize: 24.0),
               ),
             ],
           ),
@@ -286,9 +272,14 @@ class ExpandableCardState extends State<ExpandableCard> {
             onTap: () {
               if (cardHeight == maxCardHeight) {
                 print("Close card");
+                setState(() {
+                  cardHeight = minCardHeight;
+                  backgroundOpacity = 0.0;
+                });
               }
             },
-            child: Opacity(
+            child: AnimatedOpacity(
+              duration: Duration(milliseconds: 300),
               opacity: backgroundOpacity,
               child: SizedBox(
                 height: global.phoneHeight - global.bottomAppBarHeight,
@@ -340,13 +331,22 @@ class ExpandableCardState extends State<ExpandableCard> {
                 if (cardHeight < benchmark) {
                   //TODO: Minimise the card!
                   print("Minimise card");
+                  setState(() {
+                    cardHeight = minCardHeight;
+                    backgroundOpacity = 0.0;
+                  });
                 } else {
                   //TODO: Expand the card!
                   print("Expand card");
+                  setState(() {
+                    cardHeight = maxCardHeight;
+                    backgroundOpacity = 0.6;
+                  });
                 }
               }
             },
-            child: SizedBox(
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
               key: cardKey,
               height: cardHeight,
               width: global.phoneWidth * 0.9,
@@ -361,9 +361,9 @@ class ExpandableCardState extends State<ExpandableCard> {
                     Icons.keyboard_arrow_up,
                     color: Colors.grey,
                   ),
-                  Text(
-                    global.subjects[index],
-                    style: TextStyle(fontFamily: "Nunito", fontSize: 20.0),
+                  Text( 
+                    widget.todo.subjects[index],
+                    style: TextStyle(fontSize: 20.0),
                   ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.30, 0,
