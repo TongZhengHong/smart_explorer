@@ -6,12 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-double screenWidth;
-
-List chapData;
-
-List<double> activity_positions = [
-  /*235.0,
+List<double> activityPositions = [
+  235.0,
   162.0,
   86.0,
   155.0,
@@ -20,10 +16,14 @@ List<double> activity_positions = [
   271.0,
   30.0,
   103.0,
-  180.0*/
+  180.0
 ];
 
 class SubjectMap extends StatefulWidget {
+  final global.ExploreMapInfo mapInfo;
+
+  SubjectMap({Key key, @required this.mapInfo}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return new SubjectMapState();
@@ -31,89 +31,54 @@ class SubjectMap extends StatefulWidget {
 }
 
 class SubjectMapState extends State<SubjectMap> {
-  ScrollController _scroll = ScrollController();
-  int idx = global.subindex;
-  bool _loading = true;
-
-  /*Future<String> getChapData() async {
-    print("Request sent!");
-    print(global.cookie);
-    final String mapUrl =
-        "https://tinypingu.infocommsociety.com/api/exploremap";
-    final response =
-        await http.post(mapUrl, headers: {"Cookie": global.cookie});
-
-    if (response.statusCode == 200) {
-      final responseArr = json.decode(response.body);
-      responseArr.forEach((subject) {
-        chapData = subject["children"];
-        print(chapData);
-        activity_positions = [];
-        final random = new Random();
-        print(chapData[0]["children"].length);
-        chapData[0]["children"].forEach((activity) {
-          int padding = random.nextInt(global.phoneWidth.toInt()-36);
-          activity_positions.add(padding.toDouble());
-        });
-      }); //This is to get the first subject which is Econs
-
-      setState(() {
-        _loading = false;
-      });
-      return "Success!";
-    } else {
-      print("Error!");
-      return "Error!";
-    }
-  }*/
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(global.subjects[idx]),
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+        title: Text(widget.mapInfo.subjectName, style: TextStyle(color: Colors.black),),
+        centerTitle: false,
       ),
-      body: 
-      //_loading
-          //? Center(
-          //    child: CircularProgressIndicator(),
-          //  )
-           ListView.builder(
-              controller: _scroll,
-              itemCount: activity_positions.length,
+      body: ListView.builder(
+              itemCount: widget.mapInfo.chapData[0]["children"].length,
               itemBuilder: (context, i) {
                 double paddingTop = 0.0;
                 double paddingBottom = 0.0;
 
                 if (i != 0) {
                   paddingTop =
-                      (activity_positions[i - 1] - activity_positions[i]) / 5;
+                      (activityPositions[i - 1] - activityPositions[i]) / 5;
                 }
-                if (i + 1 != activity_positions.length) {
+                if (i + 1 != activityPositions.length) {
                   paddingBottom =
-                      (activity_positions[i + 1] - activity_positions[i]) / 5;
+                      (activityPositions[i + 1] - activityPositions[i]) / 5;
                 }
 
-                return new Column(
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     _buildCheckPoint(
                         false,
-                        (activity_positions[i] + 2 * paddingTop),
+                        (activityPositions[i] + 2 * paddingTop),
                         paddingTop,
                         i),
                     _buildCheckPoint(false,
-                        (activity_positions[i] + paddingTop), paddingTop, i),
-                    _buildCheckPoint(true, activity_positions[i], 0.0, i),
+                        (activityPositions[i] + paddingTop), paddingTop, i),
+                    _buildCheckPoint(true, activityPositions[i], 0.0, i),
                     _buildCheckPoint(
                         false,
-                        (activity_positions[i] + paddingBottom),
+                        (activityPositions[i] + paddingBottom),
                         paddingBottom,
                         i),
                     _buildCheckPoint(
                         false,
-                        (activity_positions[i] + 2 * paddingBottom),
+                        (activityPositions[i] + 2 * paddingBottom),
                         paddingBottom,
                         i),
                   ],
@@ -123,16 +88,15 @@ class SubjectMapState extends State<SubjectMap> {
     );
   }
 
-  Widget _buildCheckPoint(
-      bool mainCheck, double paddingLeft, double check, int position) {
+  Widget _buildCheckPoint(bool mainCheck, double paddingLeft, double check, int position) {
     if (!mainCheck && check == 0) {
-      return new Container(
+      return Container(
         height: 36.0,
       );
     } else {
       double _checkpointSize = 48.0;
       double _pathDotHeight = 36.0;
-      return new Container(
+      return Container(
         height: mainCheck ? _checkpointSize : _pathDotHeight,
         child: mainCheck
             ? _drawCircle(true, _checkpointSize, position)
@@ -147,33 +111,27 @@ class SubjectMapState extends State<SubjectMap> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    //this.getChapData();
-  }
-
   Widget _drawCircle(bool mainCheck, double diameter, int position) {
-    return new Container(
+    return Container(
       height: diameter,
       width: diameter,
-      child: new Material(
+      child: Material(
         borderRadius: BorderRadius.circular(diameter / 2),
         color: mainCheck ? global.blue : Colors.blueGrey,
         child: !mainCheck
             ? null
-            : new InkWell(
+            : InkWell(
                 borderRadius: BorderRadius.circular(diameter / 2),
                 onTap: () {
-                  global.chapindex = position;
-                  _showActivityInfo();
+                  // global.chapindex = position;
+                  _showActivityDialog(position); //Pass the position of the tap item to the dialog
                 },
               ),
       ),
     );
   }
 
-  void _showActivityInfo() {
+  void _showActivityDialog(int position) {
     showGeneralDialog(
       barrierColor: Colors.black.withOpacity(0.5),
       context: context,
@@ -181,11 +139,11 @@ class SubjectMapState extends State<SubjectMap> {
       barrierDismissible: true,
       barrierLabel: 'barrier',
       pageBuilder: (context, animation1, animation2) {
-        return _showActivityDialog();
+        return activityDialog(position);
       },
       transitionBuilder: (context, anim1, anim2, widget) {
-        return new SlideTransition(
-            position: new Tween<Offset>(
+        return SlideTransition(
+            position: Tween<Offset>(
               begin: const Offset(0.0, 1.0),
               end: Offset.zero,
             ).animate(anim1),
@@ -194,7 +152,7 @@ class SubjectMapState extends State<SubjectMap> {
     );
   }
 
-  Widget _showActivityDialog() {
+  Widget activityDialog(int position) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12.0))),
@@ -211,7 +169,7 @@ class SubjectMapState extends State<SubjectMap> {
                 padding: EdgeInsets.all(12.0), 
                 child: Container(
                   width: global.phoneWidth * 0.9,
-                  child: Text(chapData[global.chapindex]["name"], textAlign: TextAlign.left),
+                  child: Text(widget.mapInfo.chapData[position]["name"], textAlign: TextAlign.left),
                 ),
               ),
             ),
@@ -220,11 +178,12 @@ class SubjectMapState extends State<SubjectMap> {
                 padding: EdgeInsets.all(16.0), 
                 child: Container(
                   width: global.phoneWidth * 0.9,
-                  child: Text(chapData[global.subindex]["desc"], textAlign: TextAlign.left),
+                  child: Text(widget.mapInfo.chapData[position]["desc"], textAlign: TextAlign.left),
                 ),
               ),
               flex: 3,
             ),
+            //TODO: Yu peng!!! Change the button here
             global.createGradientButton(global.blueGradient, 48, global.phoneWidth * 0.60, context, SubjectMap(), "Let's Go!"),
           ],
         ),

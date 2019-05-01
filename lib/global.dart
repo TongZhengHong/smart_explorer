@@ -91,3 +91,66 @@ Widget createGradientButton(LinearGradient gradient, double height, double width
 Widget bottomAppBar(){
   return null;
 }
+
+
+class LoginInfo {
+  String studentID;
+  String studentClass;
+  String username;
+  String name;
+  String email;
+  Map activityProgress;
+  List<dynamic> subjects;
+  List<dynamic> submissions;
+  String _id;
+
+  LoginInfo(response){
+    this.studentID = response["studentID"];
+    this.studentClass = response["studentClass"];
+    this.username = response["username"];
+    this.name = response["name"];
+    this.email = response["email"];
+    this.activityProgress = response["activityProgress"];
+    this.subjects = response["subjects"]; 
+    this.submissions = response["submissions"]; 
+    this._id = response["_id"];
+   }
+}
+
+class ExploreMapInfo {
+  String subjectName;
+  List chapData;
+  Map<String, List<ExploreMapActivity>> chapters = new Map();
+
+  ExploreMapInfo(response){
+    this.subjectName = response["name"];
+    this.chapData = response["children"];
+    final chapterList = response["children"];
+
+    List<ExploreMapActivity> tempActivity = [];
+    chapterList.forEach((chap) {
+      final chapName = chap["name"];
+      final activityList = chap["children"];
+
+      activityList.forEach((act) {
+        final activity = ExploreMapActivity(act["name"], act["type"], act["desc"], 
+        act["progress"], act["maxScore"], act["_id"]);
+        tempActivity.add(activity);
+      });
+
+      chapters[chapName] = tempActivity;
+    });
+  }
+}
+
+class ExploreMapActivity {
+  String activityName;
+  String activityType;
+  String activityDesc;
+  int activityProg;
+  int activityMaxScore;
+  String activityId;
+
+  ExploreMapActivity(this.activityName, this.activityType, this.activityDesc, 
+  this.activityProg, this.activityMaxScore, this.activityId);
+}

@@ -8,30 +8,6 @@ import 'package:smart_explorer/global.dart' as global;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class Todo {
-  String studentID;
-  String studentClass;
-  String username;
-  String name;
-  String email;
-  Map activityProgress;
-  List<dynamic> subjects;
-  List<dynamic> submissions;
-  String _id;
-
-  Todo(response){
-    this.studentID = response["studentID"];
-    this.studentClass = response["studentClass"];
-    this.username = response["username"];
-    this.name = response["name"];
-    this.email = response["email"];
-    this.activityProgress = response["activityProgress"];
-    this.subjects = response["subjects"]; 
-    this.submissions = response["submissions"]; 
-    this._id = response["_id"];
-   }
-}
-
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -55,23 +31,24 @@ class LoginPageState extends State<LoginPage> {
   final _usernameControl = TextEditingController();
   final _passwordControl = TextEditingController();
 
-  StreamSubscription _connectionChangeStream;
   ConnectionStatusSingleton connectionStatus;
 
   @override
   initState() {
     super.initState();
     connectionStatus = ConnectionStatusSingleton.getInstance();
-    _connectionChangeStream = connectionStatus.connectionChange.listen(connectionChanged);
-  }
-
-  void connectionChanged(dynamic hasConnection) {
-    // setState(() {
-    //   isOffline = !hasConnection;
-    // });
   }
 
   void getPageInfo() async {
+    if (!await connectionStatus.checkConnection()) {      //If not connected!
+      print("Login: Not connected!");
+      _showDialog("Oh no!", "Something went wrong! Please check your Internet connection!");
+      setState(() {
+        loading = false;
+      });
+      return;
+    }
+
     String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
     await http.post(url, headers: {"cookie": global.cookie}).then(
         (dynamic response) async {
@@ -80,7 +57,7 @@ class LoginPageState extends State<LoginPage> {
         final responseMap = json.decode(response.body);
         
         print("Login: SUCCESS");
-        Route route = MaterialPageRoute(builder: (context) => MainPage(todo: Todo(responseMap)));
+        Route route = MaterialPageRoute(builder: (context) => MainPage(loginInfo: global.LoginInfo(responseMap)));
         Navigator.pushReplacement(context, route);
 
       } else {
@@ -88,7 +65,7 @@ class LoginPageState extends State<LoginPage> {
           loading = false;
         });
         print("Login: Error when retrieving page info");
-        _showDialog("Unexpected login error. Please check your network");
+        _showDialog("Error", "Unexpected login error");
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setStringList("AuthDetails", []);
@@ -101,6 +78,15 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void login(String username, String password) async {
+    if (!await connectionStatus.checkConnection()) {      //If not connected!
+      print("Login: Not connected!");
+      _showDialog("Oh no!", "Something went wrong! Please check your Internet connection!");
+      setState(() {
+        loading = false;
+      });
+      return;
+    }
+
     String url = 'https://tinypingu.infocommsociety.com/api/login2';
     await http.post(url, body: {"username": username, "password": password}).then(
             (dynamic response) async {
@@ -128,33 +114,33 @@ class LoginPageState extends State<LoginPage> {
         
         //Request for subject information of the student
         getPageInfo();
-        
+
       } else if (response.statusCode == 400) {
         setState(() {
           loading = false;
         });
-        _showDialog("Wrong Username or Password!");
+        _showDialog("Did you forget?", "Wrong username or password!");
         print("Login: Wrong Username or Password!");
       } else {
         setState(() {
           loading = false;
         });
-        _showDialog("Unexpected login error. Please check your network");
+        _showDialog("Error", "Unexpected login error.");
         print("Login: Unexpected login error");
       }
     });
   }
 
-  void _showDialog(String str) {
+  void _showDialog(String title, String content) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(str),
-          content: Text(""),
+          title: Text(title, style: TextStyle(fontWeight: FontWeight.bold),),
+          content: Text(content),
           actions: <Widget>[
             FlatButton(
-              child: Text("Close"),
+              child: Text("OKAY"),
               onPressed: () {
                 Navigator.of(context).pop();
               },

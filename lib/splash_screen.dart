@@ -33,7 +33,6 @@ class MyHome extends StatefulWidget {
 }
 
 class MyHomeState extends State<MyHome> {
-  StreamSubscription _connectionChangeStream;
   ConnectionStatusSingleton connectionStatus;
   var _context;
 
@@ -92,7 +91,7 @@ class MyHomeState extends State<MyHome> {
         final responseMap = json.decode(response.body);
 
         Route route = MaterialPageRoute(
-            builder: (context) => MainPage(todo: Todo(responseMap)));
+            builder: (context) => MainPage(loginInfo: global.LoginInfo(responseMap)));
         Navigator.push(context, route); //TODO: CHANGE TO PUSHREPLACMENT!
 
       } else {

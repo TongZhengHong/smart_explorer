@@ -9,7 +9,7 @@ import 'package:smart_explorer/internet.dart';
 
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
-import 'package:smart_explorer/subject_map.dart' as subject_map;
+import 'package:smart_explorer/subject_map.dart';
 import 'package:smart_explorer/subject_popup.dart';
 import 'package:smart_explorer/settings.dart';
 import 'package:smart_explorer/profile.dart';
@@ -26,10 +26,12 @@ import 'package:http/http.dart' as http;
 
 //!Run splash screen on load!
 void main() {
-  ConnectionStatusSingleton connectionStatus = ConnectionStatusSingleton.getInstance();
+  ConnectionStatusSingleton connectionStatus =
+      ConnectionStatusSingleton.getInstance();
   connectionStatus.initialize();
 
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
     runApp(Splash());
   });
 }
@@ -37,9 +39,9 @@ void main() {
 const timeout = const Duration(seconds: 5);
 
 class MainPage extends StatefulWidget {
-  final Todo todo;
+  final global.LoginInfo loginInfo;
 
-  MainPage({Key key, @required this.todo}) : super(key: key);
+  MainPage({Key key, @required this.loginInfo}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -48,106 +50,132 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  
+  StreamSubscription _connectionChangeStream;
+  ConnectionStatusSingleton connectionStatus;
+  var loginInfo;
+
   bool loading = false;
+  bool isOffline = false;
+
+  @override
+  initState() {
+    super.initState();
+    connectionStatus = ConnectionStatusSingleton.getInstance();
+    _connectionChangeStream =
+        connectionStatus.connectionChange.listen(connectionChanged);
+
+    loginInfo = widget.loginInfo;
+  }
+
+  void connectionChanged(dynamic hasConnection) {
+    setState(() {
+      isOffline = !hasConnection;
+    });
+  }
 
   void getChapData() async {
-    final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
-    final response = await http.post(mapUrl, headers: {"Cookie": global.cookie});
-
-    if (response.statusCode == 200) {
-      final responseArr = json.decode(response.body);
-      responseArr.forEach((subject) {
-        subject_map.chapData = subject["children"];
-        subject_map.activity_positions = [];
-
-        final random = new Random();
-        subject_map.chapData[0]["children"].forEach((activity) {
-          int padding = random.nextInt(global.phoneWidth.toInt()-36);
-          subject_map.activity_positions.add(padding.toDouble());
-        });
-      }); //This is to get the first subject which is Econs
-
+    if (!await connectionStatus.checkConnection()) {
+      //If not connected!
+      print("Login: Not connected!");
       setState(() {
         loading = false;
       });
-    } else {
-      print("Main: Error! Subject data not retrieved!");
+      return;
     }
+
+    final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
+    await http.post(mapUrl, headers: {"Cookie": global.cookie})
+    .then((dynamic response) {
+      if (response.statusCode == 200) {
+        final responseArr = json.decode(response.body)[0];
+        // print(responseArr);
+        // responseArr.forEach((subject) {
+          // subject_map.chapData = subject["children"];
+          // subject_map.activity_positions = [];
+
+          // final random = new Random();
+          // subject_map.chapData[0]["children"].forEach((activity) {
+          //   int padding = random.nextInt(global.phoneWidth.toInt()-36);
+          //   subject_map.activity_positions.add(padding.toDouble());
+          // });
+        // }); //This is to get the first subject which is Econs
+
+        final package = global.ExploreMapInfo(responseArr);
+        Route route = MaterialPageRoute(builder: (context) => SubjectMap(mapInfo: package));
+        Navigator.push(context, route);
+      } else {
+        print("Main: Error! Subject data not retrieved!");
+      }
+    });
+
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Todo todo = widget.todo;
-    
-    print("Main: Todo");
-    print(todo.subjects.length);
 
 //! //////////////////////////// Explore Button ////////////////////////////
     final Widget exploreButton = Container(
-      decoration: BoxDecoration(
-        gradient: global.blueButtonGradient,
-        borderRadius: BorderRadius.circular(24.0),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
-        ],
-      ),
-      width: global.phoneWidth * 0.6, //Minus the padding of 32.0px on both sides
-      height: 48.0,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            setState((){
-              loading = true;
-            });
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) { 
-                return subject_map.SubjectMap();
-              }),
-            );
-          },  //OnTap
+        decoration: BoxDecoration(
+          gradient: global.blueButtonGradient,
           borderRadius: BorderRadius.circular(24.0),
-          child: Center(
+          boxShadow: [
+            BoxShadow(
+                color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
+          ],
+        ),
+        width:
+            global.phoneWidth * 0.6, //Minus the padding of 32.0px on both sides
+        height: 48.0,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                loading = true;
+              });
+              this.getChapData();
+            }, //OnTap
+            borderRadius: BorderRadius.circular(24.0),
             child: Center(
-              child: !loading
-                ? Text(
-                    "Explore!",
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      //fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      fontFamily: "CarterOne"
-                    ),
-                  )
-                : SizedBox(
-                    height: global.phoneHeight * 0.03,
-                    width: global.phoneHeight * 0.03,
-                    child: Theme(
-                      data: Theme.of(context)
-                          .copyWith(accentColor: Colors.white),
-                      child: CircularProgressIndicator(strokeWidth: 3.0,),
-                    ),
-                  ),
+              child: Center(
+                child: !loading
+                    ? Text(
+                        "Explore!",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            //fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            fontFamily: "CarterOne"),
+                      )
+                    : SizedBox(
+                        height: global.phoneHeight * 0.03,
+                        width: global.phoneHeight * 0.03,
+                        child: Theme(
+                          data: Theme.of(context)
+                              .copyWith(accentColor: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3.0,
+                          ),
+                        ),
+                      ),
+              ),
             ),
           ),
-        ),
-      )
-    );
+        ));
 
     return Scaffold(
       backgroundColor: global.backgroundWhite,
       body: PageView.builder(
-        onPageChanged: (index) {
-          global.subindex = index;
-        },
-        itemCount: todo.subjects.length,
-        itemBuilder: (context, i) {
-          return ExpandableCard(i, todo);
-        }
-      ),
+          onPageChanged: (index) {
+            global.subindex = index;
+          },
+          itemCount: loginInfo.subjects.length,
+          itemBuilder: (context, i) {
+            return ExpandableCard(i, loginInfo);
+          }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: exploreButton,
       bottomNavigationBar: BottomAppBar(
@@ -205,9 +233,9 @@ class MainPageState extends State<MainPage> {
 
 class ExpandableCard extends StatefulWidget {
   final int index;
-  final Todo todo;
+  final global.LoginInfo loginInfo;
 
-  ExpandableCard(this.index, this.todo);
+  ExpandableCard(this.index, this.loginInfo);
 
   @override
   State<StatefulWidget> createState() {
@@ -229,7 +257,7 @@ class ExpandableCardState extends State<ExpandableCard> {
   double initialCardHeight = global.phoneHeight * 0.3;
   double startPosition;
   double position;
-  
+
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
@@ -237,12 +265,12 @@ class ExpandableCardState extends State<ExpandableCard> {
         child: Align(
             alignment: FractionalOffset.topCenter,
             child: Container(
-                padding: EdgeInsets.only(top: 128.0),
-                child: CircleAvatar(
-                  backgroundColor: Colors.redAccent,
-                  radius: 72.0,
-                ),
-                )),
+              padding: EdgeInsets.only(top: 128.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.redAccent,
+                radius: 72.0,
+              ),
+            )),
       ),
       Positioned(
         child: AppBar(
@@ -361,8 +389,8 @@ class ExpandableCardState extends State<ExpandableCard> {
                     Icons.keyboard_arrow_up,
                     color: Colors.grey,
                   ),
-                  Text( 
-                    widget.todo.subjects[index],
+                  Text(
+                    widget.loginInfo.subjects[index],
                     style: TextStyle(fontSize: 20.0),
                   ),
                   Padding(
