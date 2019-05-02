@@ -88,7 +88,7 @@ class MainPageState extends State<MainPage> {
     .then((dynamic response) {
       if (response.statusCode == 200) {
         final responseArr = json.decode(response.body)[0];
-        // print(responseArr);
+        print(responseArr);
         // responseArr.forEach((subject) {
           // subject_map.chapData = subject["children"];
           // subject_map.activity_positions = [];
@@ -103,6 +103,7 @@ class MainPageState extends State<MainPage> {
         final package = global.ExploreMapInfo(responseArr);
         Route route = MaterialPageRoute(builder: (context) => SubjectMap(mapInfo: package));
         Navigator.push(context, route);
+        print("Main: Success!");
       } else {
         print("Main: Error! Subject data not retrieved!");
       }
