@@ -17,11 +17,13 @@ import 'package:smart_explorer/profile.dart';
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
 
+int score = 0;
+
 class ActivityPage extends StatefulWidget {
   final int actNum;
   final actData;
   final pageData;
-  
+
   ActivityPage(this.actNum, this.actData, this.pageData);
 
   @override
@@ -56,16 +58,13 @@ class ActivityPageState extends State<ActivityPage> {
       //),
       body: PageView.builder(
         itemBuilder: (context, position) {
-          if (pageData[position]["type"] == "mcq"){
-            return mcqPage(position);
-          }
-          else if (pageData[position]["type"] == "info"){
+          if (pageData[position]["type"] == "mcq") {
+            return McqPage(position, pageData);
+          } else if (pageData[position]["type"] == "info") {
             return infoPage(position);
-          }
-          else if (pageData[position]["type"] == "pic"){
+          } else if (pageData[position]["type"] == "pic") {
             return picPage(position);
-          }
-          else {
+          } else {
             return saqPage(position);
           }
         },
@@ -74,13 +73,120 @@ class ActivityPageState extends State<ActivityPage> {
     );
   }
 
-  Widget mcqPage(int position){
-    int optCnt = pageData[position]["options"].length;
-    bool _pressed = false;
+  Widget infoPage(int position) {
     return Container(
       child: Column(
         children: <Widget>[
-          //The Question!
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(12.0),
+              child: Container(
+                width: global.phoneWidth * 0.9,
+                child: Html(
+                  data: pageData[position]["text"],
+                  defaultTextStyle: TextStyle(
+                    //fontFamily: 'Nunito',
+                    fontSize: 16.0,
+                  ),
+                )
+              ),
+            ),
+          ),
+        ],
+      )
+    );
+  }
+
+  Widget picPage(int position) {
+    return Container(
+        child: Column(
+      children: <Widget>[
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Container(
+                width: global.phoneWidth * 0.9,
+                child: Html(
+                  data: pageData[position]["text"],
+                  defaultTextStyle: TextStyle(
+                    //fontFamily: 'Nunito',
+                    fontSize: 16.0,
+                  ),
+                )),
+          ),
+        ),
+      ],
+    ));
+  }
+
+  Widget saqPage(int position) {
+    return Container(
+        child: Column(
+      children: <Widget>[
+        Center(
+          child: Container(
+              decoration: BoxDecoration(gradient: global.redGradient),
+              height: 60.0,
+              child: Center(
+                  heightFactor: 1.5,
+                  widthFactor: 1.5,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                    child: Html(
+                      data: pageData[position]["text"],
+                      defaultTextStyle: TextStyle(
+                        //fontFamily: 'Nunito',
+                        fontSize: 16.0,
+                      ),
+                    ),
+                  ))),
+        ),
+      ],
+    ));
+  }
+}
+
+class McqPage extends StatefulWidget {
+  final int position;
+  final pageData;
+
+  McqPage(this.position, this.pageData);
+
+  @override
+  McqPageState createState() => McqPageState(position, pageData);
+}
+
+class McqPageState extends State<McqPage> with AutomaticKeepAliveClientMixin<McqPage>{
+  List<Color> color = [];
+  bool _pressed;
+  List options = [];
+  List<double> borderWidth = [];
+  List<BorderStyle> borderStyle = [];
+  final int position;
+  final pageData;
+
+  McqPageState(this.position, this.pageData);
+
+  int optCnt;
+
+  void initState() {
+    super.initState();
+    optCnt = pageData[position]["options"].length;
+    for (var i in pageData[position]["options"]){
+      color.add(Colors.transparent);
+      borderWidth.add(2.0);
+      borderStyle.add(BorderStyle.none);
+      _pressed = false;
+    }
+    options = pageData[position]["options"];
+  }
+
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          //////////////////////////////The Question!//////////////////////////////
           Center(
             child: Container(
               decoration: BoxDecoration(
@@ -90,45 +196,172 @@ class ActivityPageState extends State<ActivityPage> {
                   colors: [Color(0xFFEB4956), Color(0xFFF48149)]
                 )
               ),
-              height: global.phoneHeight * 0.36,
+              height: global.phoneHeight * 0.45,
               width: global.phoneWidth,
               child: Center(
-                child: Container(
-                  height: global.phoneHeight * 0.28,
-                  width: global.phoneWidth * 0.8,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20.0),
-                    boxShadow: [
-                      new BoxShadow(
-                        color: Colors.grey[400],
-                        blurRadius: 1.0,
-                        spreadRadius: -10.0,
-                        offset: Offset(2.0, 18.0),
-                      ),
-                    ],
-                  ),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(20.0),
-                    elevation: 2.0,
-                    child: Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Html(
-                        data: pageData[position]["text"],
-                        defaultTextStyle: TextStyle(
-                          fontFamily: 'Nunito',
-                          fontSize: 16.0,
-                        ),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.1, global.phoneWidth * 0.1, global.phoneWidth * 0.1, global.phoneWidth * 0.05),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            height: global.phoneHeight * 0.07,
+                            width: global.phoneHeight * 0.07,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0)
+                            ),
+                            child: Material(
+                              borderRadius: BorderRadius.circular(10.0),
+                              elevation: 2.0,
+                              color: Color(0xff8585ad),
+                              child: InkWell(
+                                onTap: (){
+                                  Navigator.pop(context);
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
+                                  child: Center(
+                                    child: Column(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          "exit",
+                                          style: TextStyle(
+                                            //fontFamily: "Nunito",
+                                            fontSize: 10.0,
+                                            color: Colors.white,
+                                          )
+                                        )
+                                      ],
+                                    )
+                                  )
+                                )
+                              )
+                            )
+                          ),
+                          Container(
+                            height: global.phoneHeight * 0.07,
+                            width: global.phoneHeight * 0.07,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0)
+                            ),
+                            child: Material(
+                              borderRadius: BorderRadius.circular(10.0),
+                              elevation: 2.0,
+                              color: Color(0xff8585ad),
+                              child: InkWell(
+                                onTap: (){
+                                  Navigator.pop(context);
+                                },
+                                child: Center(
+                                  child: Column(
+                                    children: <Widget>[
+                                      Text(
+                                        "",
+                                        style: TextStyle(
+                                          //fontFamily: "Nunito",
+                                          fontSize: 8.0,
+                                          color: Colors.white,
+                                        )
+                                      ),
+                                      Text(
+                                        "hi",
+                                        style: TextStyle(
+                                          //fontFamily: "Nunito",
+                                          fontSize: 8.0,
+                                          color: Colors.white,
+                                        )
+                                      ),
+                                    ],
+                                  )
+                                )
+                              )
+                            )
+                          ),
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 500),
+                            height: global.phoneHeight * 0.07,
+                            width: global.phoneHeight * 0.07,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0)
+                            ),
+                            child: Material(
+                              borderRadius: BorderRadius.circular(10.0),
+                              elevation: 2.0,
+                              color: Color(0xff8585ad),
+                              child: Center(
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Text(
+                                        "score",
+                                        style: TextStyle(
+                                          //fontFamily: "Nunito",
+                                          fontSize: 10.0,
+                                          color: Colors.white,
+                                        )
+                                      ),
+                                      Text(
+                                        score.toString(),
+                                        style: TextStyle(
+                                          //fontFamily: "Nunito",
+                                          fontSize: 14.0,
+                                          color: Colors.white,
+                                        )
+                                      )
+                                    ],
+                                  )
+                                )
+                              )
+                            )
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                    Container(
+                      height: global.phoneHeight * 0.24,
+                      width: global.phoneWidth * 0.8,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.0),
+                        boxShadow: [
+                          new BoxShadow(
+                            color: Colors.grey[400],
+                            blurRadius: 1.0,
+                            spreadRadius: -10.0,
+                            offset: Offset(2.0, 18.0),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        borderRadius: BorderRadius.circular(20.0),
+                        elevation: 2.0,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 16.0),
+                          child: Html(
+                            data: pageData[position]["text"],
+                            defaultTextStyle: TextStyle(
+                              //fontFamily: 'Nunito',
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ]
                 )
               )
             ),
           ),
-          //The Answers!
+          //////////////////////////////The Answers!//////////////////////////////
           Container(
-            height: global.phoneHeight * 0.64,
+            height: global.phoneHeight * 0.55,
             width: global.phoneWidth,
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -141,45 +374,61 @@ class ActivityPageState extends State<ActivityPage> {
             ),
             child: ListView.builder(
               itemCount: optCnt,
-              itemBuilder: (context, pos){
+              itemBuilder: (context, pos) {
                 return Padding(
-                  padding: EdgeInsets.all(12.0),
-                  child: Container(
-                    height: global.phoneHeight * 0.1,
-                    width: global.phoneWidth * 0.75,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.0),
-                      /*boxShadow: [
-                        new BoxShadow(
-                          color: Colors.grey,
-                          blurRadius: 5.0,
+                  padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 10.0),
+                  child: Material(
+                    borderRadius: BorderRadius.circular(12.0),
+                    elevation: 2.0,
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      height: global.phoneHeight * 0.09,
+                      width: global.phoneWidth * 0.75,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: new Border.all(
+                          color: color[pos],
+                          width: borderWidth[pos],
+                          style: borderStyle[pos],
                         ),
-                      ]*/
-                    ),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(12.0),
-                      elevation: 2.0,
+                      ),
                       child: InkWell(
-                        onTap: (){
-                          this.setState((){
-                            _pressed = true;
-                          });
+                        onTap: () {
+                          if (!_pressed){
+                            setState(() {
+                              _pressed = true;
+                              for (int i = 0; i < optCnt; i++){
+                                if (options[i]["correct"] == true){
+                                  color[i] = Colors.green;
+                                  borderWidth[i] = 2.0;
+                                  borderStyle[i] = BorderStyle.solid;
+                                }
+                              }
+                              if (options[pos]["correct"] == false){
+                                color[pos] = Colors.red;
+                                borderWidth[pos] = 2.0;
+                                borderStyle[pos] = BorderStyle.solid;
+                              }
+                              else {
+                                score += pageData[position]["maxScore"];
+                              }
+                            });
+                          }
                         },
                         child: Padding(
                           padding: EdgeInsets.all(10.0),
                           child: Text(
                             pageData[position]["options"][pos]["text"],
                             style: TextStyle(
-                              fontFamily: 'Nunito',
+                              //fontFamily: 'Nunito',
                               fontSize: 14.0,
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    )
                   ),
-                  //child: Text("Hello!"),
                 );
               },
             )
@@ -189,95 +438,6 @@ class ActivityPageState extends State<ActivityPage> {
     );
   }
 
-  Widget infoPage(int position){
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(12.0), 
-              child: Container(
-                width: global.phoneWidth * 0.9,
-                child: Html(
-                  data: pageData[position]["text"],
-                  defaultTextStyle: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 16.0,
-                  ),
-                )
-              ),
-            ),
-          ),
-        ],
-      )
-    );
-  }
-
-  Widget picPage(int position){
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(12.0), 
-              child: Container(
-                width: global.phoneWidth * 0.9,
-                child: Html(
-                  data: pageData[position]["text"],
-                  defaultTextStyle: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 16.0,
-                  ),
-                )
-              ),
-            ),
-          ),
-        ],
-      )
-    );
-  }
-
-  Widget saqPage(int position){
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Center(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: global.redGradient
-              ),
-              height: 60.0,
-              child: Center(
-                heightFactor: 1.5,
-                widthFactor: 1.5,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(12.0))
-                  ),
-                  child: Html(
-                    data: pageData[position]["text"],
-                    defaultTextStyle: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 16.0,
-                    ),
-                  ),
-                )
-              )
-            ),
-          ),
-          /*Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(12.0), 
-              child: Container(
-                width: global.phoneWidth * 0.9,
-                child: Html(
-                  
-                )
-              ),
-            ),
-          ),*/
-        ],
-      )
-    );
-  }
+  @override
+  bool get wantKeepAlive => true;
 }
