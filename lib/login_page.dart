@@ -55,7 +55,7 @@ class LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         print("Login: Retrieved page info!");
         final responseMap = json.decode(response.body);
-        
+        print(responseMap);
         print("Login: SUCCESS");
         Route route = MaterialPageRoute(builder: (context) => MainPage(loginInfo: global.LoginInfo(responseMap)));
         Navigator.pushReplacement(context, route);
@@ -87,20 +87,30 @@ class LoginPageState extends State<LoginPage> {
       return;
     }
 
-    String url = 'https://tinypingu.infocommsociety.com/api/login2';
+    String url = 'https://tinypingu.infocommsociety.com/api/login-student';
     await http.post(url, body: {"username": username, "password": password}).then(
             (dynamic response) async {
       if (response.statusCode == 200) {
         print("Login: Correct username & password");
         global.studentID = username;
         String rawCookie = response.headers['set-cookie'];
+        print("Cookie:");
+        print(rawCookie);
+
+        print("Login: Cookie Set!");
+
         int index = rawCookie.indexOf(';');
 
         global.cookie =
             (index == -1) ? rawCookie : rawCookie.substring(0, index);
         final responseMap = json.decode(response.body);
+        print(responseMap);
         global.studentName = responseMap["Name"];
         global.studentEmail = responseMap["Email"];
+
+        print(global.studentName);
+        print(global.studentEmail);
+        print("Login: Student info retrieved!!!!!");
 
         List<String> info = [
           global.studentID,

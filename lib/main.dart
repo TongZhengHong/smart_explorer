@@ -59,6 +59,7 @@ class MainPageState extends State<MainPage> {
 
   @override
   initState() {
+    print("Main: Started!");
     super.initState();
     connectionStatus = ConnectionStatusSingleton.getInstance();
     _connectionChangeStream =
@@ -73,7 +74,7 @@ class MainPageState extends State<MainPage> {
     });
   }
 
-  void getChapData() async {
+  void getChapData(int subIndex) async {
     if (!await connectionStatus.checkConnection()) {
       //If not connected!
       print("Login: Not connected!");
@@ -83,11 +84,14 @@ class MainPageState extends State<MainPage> {
       return;
     }
 
+    print("COOKIE: ");
+    print(global.cookie);
+
     final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
-    await http.post(mapUrl, headers: {"Cookie": global.cookie})
+    await http.post(mapUrl, headers: {"Cookie": global.cookie}, body: {"courseCode": loginInfo.subjects[subIndex]["courseCode"]})
     .then((dynamic response) {
       if (response.statusCode == 200) {
-        final responseArr = json.decode(response.body)[0];
+        final responseArr = json.decode(response.body);
         print(responseArr);
         // responseArr.forEach((subject) {
           // subject_map.chapData = subject["children"];
@@ -137,7 +141,7 @@ class MainPageState extends State<MainPage> {
               setState(() {
                 loading = true;
               });
-              this.getChapData();
+              this.getChapData(global.subindex);
             }, //OnTap
             borderRadius: BorderRadius.circular(24.0),
             child: Center(
@@ -391,7 +395,7 @@ class ExpandableCardState extends State<ExpandableCard> {
                     color: Colors.grey,
                   ),
                   Text(
-                    widget.loginInfo.subjects[index],
+                    widget.loginInfo.subjects[index]["name"],
                     style: TextStyle(fontSize: 20.0),
                   ),
                   Padding(

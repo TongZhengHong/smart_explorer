@@ -84,11 +84,14 @@ class MyHomeState extends State<MyHome> {
     }
 
     String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
+    print("Splash Cookie:");
+    print(global.cookie);
     await http.post(url, headers: {"cookie": global.cookie}).then(
         (dynamic response) async {
       if (response.statusCode == 200) {
         print("Splash: Retrieved page info!");
         final responseMap = json.decode(response.body);
+        print(responseMap);
 
         Route route = MaterialPageRoute(
             builder: (context) => MainPage(loginInfo: global.LoginInfo(responseMap)));

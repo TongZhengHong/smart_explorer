@@ -49,7 +49,7 @@ class ActivityPageState extends State<ActivityPage> {
   }
 
   Widget build(BuildContext context) {
-    List actPages = actData["children"];
+    List actPages = actData["pages"];
     int actCnt = actPages.length;
     print(actPages);
     return Scaffold(
@@ -196,243 +196,260 @@ class McqPageState extends State<McqPage> with AutomaticKeepAliveClientMixin<Mcq
                   colors: [Color(0xFFEB4956), Color(0xFFF48149)]
                 )
               ),
-              height: global.phoneHeight * 0.45,
-              width: global.phoneWidth,
-              child: Center(
-                child: Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.1, global.phoneWidth * 0.1, global.phoneWidth * 0.1, global.phoneWidth * 0.05),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            height: global.phoneHeight * 0.07,
-                            width: global.phoneHeight * 0.07,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0)
-                            ),
-                            child: Material(
-                              borderRadius: BorderRadius.circular(10.0),
-                              elevation: 2.0,
-                              color: Color(0xff8585ad),
-                              child: InkWell(
-                                onTap: (){
-                                  Navigator.pop(context);
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
-                                  child: Center(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Icon(
-                                          Icons.close,
-                                          color: Colors.white,
-                                        ),
-                                        Text(
-                                          "exit",
-                                          style: TextStyle(
-                                            //fontFamily: "Nunito",
-                                            fontSize: 10.0,
-                                            color: Colors.white,
-                                          )
+              //height: global.phoneHeight * 0.45,
+              //width: global.phoneWidth,
+              child: Wrap(
+                children: <Widget> [
+                  Center(
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.1, global.phoneWidth * 0.1, global.phoneWidth * 0.1, global.phoneWidth * 0.05),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                height: global.phoneHeight * 0.07,
+                                width: global.phoneHeight * 0.07,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0)
+                                ),
+                                child: Material(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  elevation: 2.0,
+                                  color: Color(0xff8585ad),
+                                  child: InkWell(
+                                    onTap: (){
+                                      Navigator.pop(context);
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
+                                      child: Center(
+                                        child: Column(
+                                          children: <Widget>[
+                                            Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              "exit",
+                                              style: TextStyle(
+                                                //fontFamily: "Nunito",
+                                                fontSize: 10.0,
+                                                color: Colors.white,
+                                              )
+                                            )
+                                          ],
                                         )
-                                      ],
+                                      )
                                     )
                                   )
                                 )
-                              )
-                            )
-                          ),
-                          Container(
-                            height: global.phoneHeight * 0.07,
-                            width: global.phoneHeight * 0.07,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0)
-                            ),
-                            child: Material(
-                              borderRadius: BorderRadius.circular(10.0),
-                              elevation: 2.0,
-                              color: Color(0xff8585ad),
-                              child: InkWell(
-                                onTap: (){
-                                  Navigator.pop(context);
-                                },
-                                child: Center(
-                                  child: Column(
-                                    children: <Widget>[
-                                      Text(
-                                        "",
-                                        style: TextStyle(
-                                          //fontFamily: "Nunito",
-                                          fontSize: 8.0,
-                                          color: Colors.white,
-                                        )
-                                      ),
-                                      Text(
-                                        "hi",
-                                        style: TextStyle(
-                                          //fontFamily: "Nunito",
-                                          fontSize: 8.0,
-                                          color: Colors.white,
-                                        )
-                                      ),
-                                    ],
-                                  )
-                                )
-                              )
-                            )
-                          ),
-                          AnimatedContainer(
-                            duration: Duration(milliseconds: 500),
-                            height: global.phoneHeight * 0.07,
-                            width: global.phoneHeight * 0.07,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0)
-                            ),
-                            child: Material(
-                              borderRadius: BorderRadius.circular(10.0),
-                              elevation: 2.0,
-                              color: Color(0xff8585ad),
-                              child: Center(
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
-                                  child: Column(
-                                    children: <Widget>[
-                                      Text(
-                                        "score",
-                                        style: TextStyle(
-                                          //fontFamily: "Nunito",
-                                          fontSize: 10.0,
-                                          color: Colors.white,
-                                        )
-                                      ),
-                                      Text(
-                                        score.toString(),
-                                        style: TextStyle(
-                                          //fontFamily: "Nunito",
-                                          fontSize: 14.0,
-                                          color: Colors.white,
-                                        )
+                              ),
+                              Container(
+                                height: global.phoneHeight * 0.07,
+                                width: global.phoneHeight * 0.07,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0)
+                                ),
+                                child: Material(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  elevation: 2.0,
+                                  color: Color(0xff8585ad),
+                                  child: InkWell(
+                                    onTap: (){
+                                      Navigator.pop(context);
+                                    },
+                                    child: Center(
+                                      child: Column(
+                                        children: <Widget>[
+                                          Text(
+                                            "",
+                                            style: TextStyle(
+                                              //fontFamily: "Nunito",
+                                              fontSize: 8.0,
+                                              color: Colors.white,
+                                            )
+                                          ),
+                                          Text(
+                                            "hi",
+                                            style: TextStyle(
+                                              //fontFamily: "Nunito",
+                                              fontSize: 8.0,
+                                              color: Colors.white,
+                                            )
+                                          ),
+                                        ],
                                       )
-                                    ],
+                                    )
                                   )
                                 )
-                              )
-                            )
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      height: global.phoneHeight * 0.24,
-                      width: global.phoneWidth * 0.8,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20.0),
-                        boxShadow: [
-                          new BoxShadow(
-                            color: Colors.grey[400],
-                            blurRadius: 1.0,
-                            spreadRadius: -10.0,
-                            offset: Offset(2.0, 18.0),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        borderRadius: BorderRadius.circular(20.0),
-                        elevation: 2.0,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 16.0),
-                          child: Html(
-                            data: pageData[position]["text"],
-                            defaultTextStyle: TextStyle(
-                              //fontFamily: 'Nunito',
-                              fontSize: 14.0,
-                            ),
+                              ),
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 500),
+                                height: global.phoneHeight * 0.07,
+                                width: global.phoneHeight * 0.07,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10.0)
+                                ),
+                                child: Material(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  elevation: 2.0,
+                                  color: Color(0xff8585ad),
+                                  child: Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
+                                      child: Column(
+                                        children: <Widget>[
+                                          Text(
+                                            "score",
+                                            style: TextStyle(
+                                              //fontFamily: "Nunito",
+                                              fontSize: 10.0,
+                                              color: Colors.white,
+                                            )
+                                          ),
+                                          Text(
+                                            score.toString(),
+                                            style: TextStyle(
+                                              //fontFamily: "Nunito",
+                                              fontSize: 14.0,
+                                              color: Colors.white,
+                                            )
+                                          )
+                                        ],
+                                      )
+                                    )
+                                  )
+                                )
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, global.phoneHeight * 0.05),
+                          child: Container(
+                            //height: global.phoneHeight * 0.24,
+                            width: global.phoneWidth * 0.8,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20.0),
+                              boxShadow: [
+                                new BoxShadow(
+                                  color: Colors.grey[400],
+                                  blurRadius: 1.0,
+                                  spreadRadius: -10.0,
+                                  offset: Offset(2.0, 18.0),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              borderRadius: BorderRadius.circular(20.0),
+                              elevation: 2.0,
+                              child: Wrap(
+                                children: <Widget> [
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.05, 0.0, global.phoneWidth * 0.05, 0.0),
+                                    child: Html(
+                                      data: pageData[position]["text"],
+                                      defaultTextStyle: TextStyle(
+                                        //fontFamily: 'Nunito',
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                  ),
+                                ]
+                              )
+                            ),
+                          )
+                        )
+                      ]
                     )
-                  ]
-                )
+                  )
+                ]
               )
             ),
           ),
           //////////////////////////////The Answers!//////////////////////////////
-          Container(
-            height: global.phoneHeight * 0.55,
-            width: global.phoneWidth,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                stops: [0.1, 0.9],
-                colors: [
-                  Colors.grey[200],
-                  Colors.grey[100],
-                ],
+          Expanded(
+          child: Container(
+              //height: global.phoneHeight * 0.55,
+              width: global.phoneWidth,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  stops: [0.1, 0.9],
+                  colors: [
+                    Colors.grey[200],
+                    Colors.grey[100],
+                  ],
+                ),
               ),
-            ),
-            child: ListView.builder(
-              itemCount: optCnt,
-              itemBuilder: (context, pos) {
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 10.0),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(12.0),
-                    elevation: 2.0,
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 500),
-                      height: global.phoneHeight * 0.09,
-                      width: global.phoneWidth * 0.75,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.0),
-                        border: new Border.all(
-                          color: color[pos],
-                          width: borderWidth[pos],
-                          style: borderStyle[pos],
+              child: ListView.builder(
+                itemCount: optCnt,
+                itemBuilder: (context, pos) {
+                  return Padding(
+                    padding: EdgeInsets.fromLTRB(12.0, 0.0, 12.0, 10.0),
+                    child: Material(
+                      borderRadius: BorderRadius.circular(12.0),
+                      elevation: 2.0,
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 500),
+                        //height: global.phoneHeight * 0.09,
+                        width: global.phoneWidth * 0.75,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: new Border.all(
+                            color: color[pos],
+                            width: borderWidth[pos],
+                            style: borderStyle[pos],
+                          ),
                         ),
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          if (!_pressed){
-                            setState(() {
-                              _pressed = true;
-                              for (int i = 0; i < optCnt; i++){
-                                if (options[i]["correct"] == true){
-                                  color[i] = Colors.green;
-                                  borderWidth[i] = 2.0;
-                                  borderStyle[i] = BorderStyle.solid;
+                        child: InkWell(
+                          onTap: () {
+                            if (!_pressed){
+                              setState(() {
+                                _pressed = true;
+                                for (int i = 0; i < optCnt; i++){
+                                  if (options[i]["correct"] == true){
+                                    color[i] = Colors.green;
+                                    borderWidth[i] = 2.0;
+                                    borderStyle[i] = BorderStyle.solid;
+                                  }
                                 }
-                              }
-                              if (options[pos]["correct"] == false){
-                                color[pos] = Colors.red;
-                                borderWidth[pos] = 2.0;
-                                borderStyle[pos] = BorderStyle.solid;
-                              }
-                              else {
-                                score += pageData[position]["maxScore"];
-                              }
-                            });
-                          }
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: Text(
-                            pageData[position]["options"][pos]["text"],
-                            style: TextStyle(
-                              //fontFamily: 'Nunito',
-                              fontSize: 14.0,
+                                if (options[pos]["correct"] == false){
+                                  color[pos] = Colors.red;
+                                  borderWidth[pos] = 2.0;
+                                  borderStyle[pos] = BorderStyle.solid;
+                                }
+                                else {
+                                  score += pageData[position]["maxScore"];
+                                }
+                              });
+                            }
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Wrap(
+                              children: <Widget> [
+                                Text(
+                                  pageData[position]["options"][pos]["text"],
+                                  style: TextStyle(
+                                    //fontFamily: 'Nunito',
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ]
                             ),
                           ),
                         ),
-                      ),
-                    )
-                  ),
-                );
-              },
-            )
-          ),
+                      )
+                    ),
+                  );
+                },
+              )
+            ),
+          )
         ],
       )
     );
