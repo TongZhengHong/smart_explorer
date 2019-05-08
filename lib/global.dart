@@ -31,6 +31,7 @@ double bottomAppBarHeight = 56.0;
 Color blue = const Color(0xFF78B2FA);
 Color appBarLightBlue = const Color(0xFFCDD6F0);
 Color backgroundWhite = const Color(0xFFF6F8FC);
+Color darkBlue = const Color(0xFF1B417C);
 
 LinearGradient blueGradient = new LinearGradient(
   colors: [Color(0xFF78B5FA), Color(0xFF7DA2FF)]
@@ -46,6 +47,12 @@ LinearGradient redGradient = new LinearGradient(
 
 LinearGradient greenGradient = new LinearGradient(
   colors: [Color(0xFF57CDDB), Color(0xFF4AE296)]
+);
+
+LinearGradient bluePurpleDiagonalGradient = new LinearGradient(
+  begin: FractionalOffset.bottomLeft,
+  end: FractionalOffset.topRight,
+  colors: [Color(0xFF78B5FA), Color(0xFF9586FD)]
 );
 
 Widget createGradientButton(LinearGradient gradient, double height, double width, BuildContext context, Widget route, String content){
@@ -91,7 +98,6 @@ Widget createGradientButton(LinearGradient gradient, double height, double width
 Widget bottomAppBar(){
   return null;
 }
-
 
 class LoginInfo {
   String studentID;

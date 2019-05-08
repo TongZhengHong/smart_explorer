@@ -42,8 +42,11 @@ class SubjectMapState extends State<SubjectMap> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0.0,
-        title: Text(widget.mapInfo.subjectName, style: TextStyle(color: Colors.black),),
+        title: Text(widget.mapInfo.subjectName, style: TextStyle(color: Colors.black, fontFamily: "CarterOne"),),
         centerTitle: false,
+        iconTheme: IconThemeData(
+          color: Colors.grey.shade800, //change your color here
+        ),
       ),
       body: ListView.builder(
               itemCount: widget.mapInfo.chapData[0]["children"].length,
@@ -51,14 +54,13 @@ class SubjectMapState extends State<SubjectMap> {
                 double paddingTop = 0.0;
                 double paddingBottom = 0.0;
 
-                if (i != 0) {
+                if (i != 0) 
                   paddingTop =
                       (activityPositions[i - 1] - activityPositions[i]) / 5;
-                }
-                if (i + 1 != activityPositions.length) {
+                      
+                if (i + 1 != activityPositions.length) 
                   paddingBottom =
                       (activityPositions[i + 1] - activityPositions[i]) / 5;
-                }
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +171,7 @@ class SubjectMapState extends State<SubjectMap> {
                 padding: EdgeInsets.all(12.0), 
                 child: Container(
                   width: global.phoneWidth * 0.9,
-                  child: Text(widget.mapInfo.chapData[position]["name"], textAlign: TextAlign.left),
+                  child: Text(widget.mapInfo.chapData[position]["name"], textAlign: TextAlign.left,),
                 ),
               ),
             ),

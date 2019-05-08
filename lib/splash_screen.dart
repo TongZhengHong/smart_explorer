@@ -68,7 +68,7 @@ class MyHomeState extends State<MyHome> {
       print("Splash: Not logged in! Directing to login page...");
       Timer(timeout, () {
         Route route = MaterialPageRoute(builder: (context) => LoginPage());
-        Navigator.push(_context, route); //TODO: CHANGE TO PUSHREPLACMENT!
+        Navigator.pushReplacement(_context, route);
       });
     }
   }
@@ -83,16 +83,17 @@ class MyHomeState extends State<MyHome> {
       return;
     }
 
+    print("Splash: " + global.cookie);
     String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
     await http.post(url, headers: {"cookie": global.cookie}).then(
         (dynamic response) async {
       if (response.statusCode == 200) {
         print("Splash: Retrieved page info!");
-        final responseMap = json.decode(response.body);
+        final responseArr = json.decode(response.body);
 
         Route route = MaterialPageRoute(
-            builder: (context) => MainPage(loginInfo: global.LoginInfo(responseMap)));
-        Navigator.push(context, route); //TODO: CHANGE TO PUSHREPLACMENT!
+            builder: (context) => MainPage(loginInfo: responseArr));
+        Navigator.pushReplacement(context, route);
 
       } else {
         print("Splash: Error when retrieving page info");
