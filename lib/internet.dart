@@ -25,7 +25,7 @@ class ConnectionStatusSingleton {
 
     Stream get connectionChange => connectionChangeController.stream;
 
-    //A clean up method to close our StreamController
+    //   A clean up method to close our StreamController
     //   Because this is meant to exist through the entire application life cycle this isn't
     //   really an issue
     void dispose() {

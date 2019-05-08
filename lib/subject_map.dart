@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/global.dart' as global;
+import 'package:smart_explorer/activity.dart';
 
 import 'dart:math';
 import 'dart:async';
@@ -36,8 +37,58 @@ class SubjectMapState extends State<SubjectMap> {
     super.initState();
   }
 
+  List actPages = [];
+  var act;
+  bool _loading = false;
+
+  void getPageData(int position, int id) async {
+    final String mapUrl = "https://tinypingu.infocommsociety.com/api/getactivity";
+    print("Entered!");
+    print("ID:");
+    await http.post(mapUrl, headers: {"Cookie": global.cookie}, body: {"id" : id.toString()})
+    .then((dynamic response) {
+      //print(response.statusCode);
+      if (response.statusCode == 200) {
+        final responseArr = json.decode(response.body);
+        actPages = responseArr["pages"];
+        act = responseArr;
+        print(responseArr);
+        print("Activity: Success!");
+      } else {
+        print("Activity: Error! Page data not retrieved!");
+      }
+    });
+    Route route = MaterialPageRoute(builder: (context) => ActivityPage(chptPos[position], act, actPages));
+    Navigator.push(context, route);
+
+    setState(() {
+      _loading = false;
+    });
+  }
+
+  List activities = [];
+  List chptPos = [];
+  //NOTE: Activities are here!!
+
   @override
   Widget build(BuildContext context) {
+    //NOTE: Initialising all the activities
+    int itemCnt = 0;
+    //print("DEBUG!!!");
+    //print(widget.mapInfo.chapData);
+    widget.mapInfo.chapData.forEach((chapter){
+      int cnt = 0;
+      //print(chapter);
+      itemCnt += chapter["children"].length;
+      chapter["children"].forEach((activity){
+        //getPageData(id);
+        activities.add(activity);
+        chptPos.add(cnt);
+        cnt++;
+      });
+    });
+    print(activities);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -49,7 +100,7 @@ class SubjectMapState extends State<SubjectMap> {
         ),
       ),
       body: ListView.builder(
-              itemCount: widget.mapInfo.chapData[0]["children"].length,
+              itemCount: itemCnt,
               itemBuilder: (context, i) {
                 double paddingTop = 0.0;
                 double paddingBottom = 0.0;
@@ -155,6 +206,13 @@ class SubjectMapState extends State<SubjectMap> {
   }
 
   Widget activityDialog(int position) {
+    LinearGradient gradient = global.blueGradient;
+    double height = 48;
+    double width = global.phoneWidth * 0.60;
+    BuildContext context1 = context;
+    Widget route; //NOTE: Navigate to activity page!
+    String content = "Let's Go!";
+
     return AlertDialog(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12.0))),
@@ -171,7 +229,7 @@ class SubjectMapState extends State<SubjectMap> {
                 padding: EdgeInsets.all(12.0), 
                 child: Container(
                   width: global.phoneWidth * 0.9,
-                  child: Text(widget.mapInfo.chapData[position]["name"], textAlign: TextAlign.left,),
+                  child: Text(activities[position]["name"], textAlign: TextAlign.left),
                 ),
               ),
             ),
@@ -180,13 +238,63 @@ class SubjectMapState extends State<SubjectMap> {
                 padding: EdgeInsets.all(16.0), 
                 child: Container(
                   width: global.phoneWidth * 0.9,
-                  child: Text(widget.mapInfo.chapData[position]["desc"], textAlign: TextAlign.left),
+                  child: Text(activities[position]["dsc"], textAlign: TextAlign.left),
                 ),
               ),
               flex: 3,
             ),
-            //TODO: Yu peng!!! Change the button here
-            global.createGradientButton(global.blueGradient, 48, global.phoneWidth * 0.60, context, SubjectMap(), "Let's Go!"),
+            Container(
+              decoration: BoxDecoration(
+                gradient: gradient,
+                borderRadius: BorderRadius.circular(height/2),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.grey, blurRadius: 4.0, offset: Offset(2.0, 2.0)),
+                ],
+              ),
+              height: height,
+              width: width,
+              child: Material(
+                borderRadius: BorderRadius.circular(height/2),
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () { //NOTE: Changing pages here
+                    setState(() {
+                      _loading = true;
+                    });
+                    //print("TESTING TESTING");
+                    //print(activities[position]["children"]);
+                    this.getPageData(position, activities[position]["id"]);
+                  },
+                  borderRadius: BorderRadius.circular(24.0),
+                  child: Center(
+                    child: Center(
+                      child: !_loading 
+                      ? Text(
+                        content,
+                        style: TextStyle(
+                          fontFamily: "Nunito",
+                          fontSize: 20.0,
+                          color: Colors.white,
+                        ),
+                      )
+                      : SizedBox(
+                        height: global.phoneHeight * 0.03,
+                        width: global.phoneHeight * 0.03,
+                        child: Theme(
+                          data: Theme.of(context)
+                              .copyWith(accentColor: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )//TODO: Yu peng!!! Change the button here
+            //global.createGradientButton(global.blueGradient, 48, global.phoneWidth * 0.60, context, ActivityPage(position, widget.mapInfo.chapData[position]["children"][0]), "Let's Go!"),
           ],
         ),
       )

@@ -109,17 +109,21 @@ class LoginInfo {
   List<dynamic> subjects;
   List<dynamic> submissions;
   String _id;
-
+  
   LoginInfo(response){
-    this.studentID = response["studentID"];
-    this.studentClass = response["studentClass"];
-    this.username = response["username"];
-    this.name = response["name"];
-    this.email = response["email"];
-    this.activityProgress = response["activityProgress"];
-    this.subjects = response["subjects"]; 
-    this.submissions = response["submissions"]; 
-    this._id = response["_id"];
+    print("DEBUG RESPONSE: ");
+    print(response);
+    //this.studentID = response["studentId"];
+    //this.studentClass = response["studentClass"];
+    //this.username = response["username"];
+    //this.name = response["name"];
+    //this.email = response["email"];
+    //this.activityProgress = response["activityProgress"];
+    this.subjects = response; 
+    print(this.subjects);
+    //this.submissions = response["submissions"]; 
+    //this._id = response["_id"];
+    print("Survived!");
    }
 }
 
@@ -139,8 +143,8 @@ class ExploreMapInfo {
       final activityList = chap["children"];
 
       activityList.forEach((act) {
-        final activity = ExploreMapActivity(act["name"], act["type"], act["desc"], 
-        act["progress"], act["maxScore"], act["_id"]);
+        final activity = ExploreMapActivity(act["name"], act["type"], act["dsc"], 
+        act["ord"], act["maxScore"], act["id"]);
         tempActivity.add(activity);
       });
 
@@ -155,7 +159,7 @@ class ExploreMapActivity {
   String activityDesc;
   int activityProg;
   int activityMaxScore;
-  String activityId;
+  int activityId;
 
   ExploreMapActivity(this.activityName, this.activityType, this.activityDesc, 
   this.activityProg, this.activityMaxScore, this.activityId);

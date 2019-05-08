@@ -85,6 +85,8 @@ class MyHomeState extends State<MyHome> {
 
     print("Splash: " + global.cookie);
     String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
+    print("Splash Cookie:");
+    print(global.cookie);
     await http.post(url, headers: {"cookie": global.cookie}).then(
         (dynamic response) async {
       if (response.statusCode == 200) {
