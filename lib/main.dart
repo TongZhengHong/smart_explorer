@@ -86,11 +86,9 @@ class MainPageState extends State<MainPage> {
       return;
     }
 
-    final String mapUrl =
-        "https://tinypingu.infocommsociety.com/api/exploremap";
-    await http.post(
-      mapUrl,
-      headers: {"Cookie": global.cookie}, /*body: {"courseCode"}*/
+    final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
+    await http.post(mapUrl,
+      headers: {"Cookie": global.cookie}, body: {"courseCode" : widget.loginInfo[subIndex]["courseCode"]}
     ).then((dynamic response) {
       if (response.statusCode == 200) {
         final responseArr = json.decode(response.body);
@@ -226,6 +224,7 @@ class MainPageState extends State<MainPage> {
               : NeverScrollableScrollPhysics(),
           onPageChanged: (index) {
             currentPage = index;
+            global.subindex = index;
           },
           itemCount: widget.loginInfo.length,
           itemBuilder: (context, i) {
