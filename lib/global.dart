@@ -1,4 +1,5 @@
 library my_prj.globals;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,7 @@ String auth_details = "AuthDetails";  //Includes studentID, Name and Email
 //! Parameters
 double phoneHeight = 0.0;
 double phoneWidth = 0.0;
+double statusBarHeight = 0.0;
 double navBarHeight = 200;
 double bottomAppBarHeight = 56.0;
 
@@ -53,6 +55,12 @@ LinearGradient bluePurpleDiagonalGradient = new LinearGradient(
   begin: FractionalOffset.bottomLeft,
   end: FractionalOffset.topRight,
   colors: [Color(0xFF78B5FA), Color(0xFF9586FD)]
+);
+
+LinearGradient greenDiagonalGradient = new LinearGradient(
+  begin: FractionalOffset.bottomLeft,
+  end: FractionalOffset.topRight,
+  colors: [Color(0xFF4AE296), Color(0xFF57CDDB)]
 );
 
 Widget createGradientButton(LinearGradient gradient, double height, double width, BuildContext context, Widget route, String content){
@@ -111,8 +119,8 @@ class LoginInfo {
   String _id;
   
   LoginInfo(response){
-    print("DEBUG RESPONSE: ");
-    print(response);
+    // print("DEBUG RESPONSE: ");
+    // print(response);
     //this.studentID = response["studentId"];
     //this.studentClass = response["studentClass"];
     //this.username = response["username"];
@@ -120,10 +128,10 @@ class LoginInfo {
     //this.email = response["email"];
     //this.activityProgress = response["activityProgress"];
     this.subjects = response; 
-    print(this.subjects);
+    // print(this.subjects);
     //this.submissions = response["submissions"]; 
     //this._id = response["_id"];
-    print("Survived!");
+    // print("Survived!");
    }
 }
 
@@ -163,4 +171,200 @@ class ExploreMapActivity {
 
   ExploreMapActivity(this.activityName, this.activityType, this.activityDesc, 
   this.activityProg, this.activityMaxScore, this.activityId);
+}
+
+int randomRange(int n1, int n2, int seed) {
+  math.Random random = math.Random(seed);
+
+  int minInt, maxInt;
+
+  if (n1 > n2) {
+    maxInt = n1;
+    minInt = n2;
+  } else if (n1 < n2) {
+    minInt = n1;
+    maxInt = n2;
+  } else return n1;
+
+  int number = random.nextInt(maxInt);
+  while (number < minInt) 
+    number = random.nextInt(maxInt);
+
+  return number;
+}
+
+//Part to copy from the source code.
+const Duration _kUnconfirmedSplashDuration = const Duration(milliseconds: 2000);
+const Duration _kSplashFadeDuration = const Duration(milliseconds: 400);
+
+const double _kSplashInitialSize = 0.0; // logical pixels
+const double _kSplashConfirmedVelocity = 0.2;
+
+class CustomSplashFactory extends InteractiveInkFeatureFactory {
+  const CustomSplashFactory();
+
+  @override
+  InteractiveInkFeature create({MaterialInkController controller, RenderBox referenceBox, Offset position, Color color, TextDirection textDirection, bool containedInkWell = false, rectCallback, BorderRadius borderRadius, ShapeBorder customBorder, double radius, onRemoved}) {
+    return new CustomSplash(
+      controller: controller,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: containedInkWell,
+      rectCallback: rectCallback,
+      borderRadius: borderRadius,
+      radius: radius,
+      onRemoved: onRemoved,
+    );
+  }
+}
+
+class CustomSplash extends InteractiveInkFeature {
+  static const InteractiveInkFeatureFactory splashFactory = const CustomSplashFactory();
+
+  CustomSplash({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    Offset position,
+    Color color,
+    bool containedInkWell = false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    double radius,
+    VoidCallback onRemoved,
+  }) : _position = position,
+        _borderRadius = borderRadius ?? BorderRadius.zero,
+        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
+        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
+        _repositionToReferenceBox = !containedInkWell,
+        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+    assert(_borderRadius != null);
+    _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..forward();
+    _radius = new Tween<double>(
+        begin: _kSplashInitialSize,
+        end: _targetRadius
+    ).animate(_radiusController);
+    _alphaController = new AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..addStatusListener(_handleAlphaStatusChanged);
+    _alpha = new IntTween(
+        begin: color.alpha,
+        end: 0
+    ).animate(_alphaController);
+
+    controller.addInkFeature(this);
+  }
+
+  final Offset _position;
+  final BorderRadius _borderRadius;
+  final double _targetRadius;
+  final RectCallback _clipCallback;
+  final bool _repositionToReferenceBox;
+
+  Animation<double> _radius;
+  AnimationController _radiusController;
+
+  Animation<int> _alpha;
+  AnimationController _alphaController;
+
+  @override
+  void confirm() {
+    final int duration = (_targetRadius / _kSplashConfirmedVelocity).floor();
+    _radiusController
+      ..duration = new Duration(milliseconds: duration)
+      ..forward();
+    _alphaController.forward();
+  }
+
+  @override
+  void cancel() {
+    _alphaController?.forward();
+  }
+
+  void _handleAlphaStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed)
+      dispose();
+  }
+
+  @override
+  void dispose() {
+    _radiusController.dispose();
+    _alphaController.dispose();
+    _alphaController = null;
+    super.dispose();
+  }
+
+  RRect _clipRRectFromRect(Rect rect) {
+    return new RRect.fromRectAndCorners(
+      rect,
+      topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+      bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+    );
+  }
+
+  void _clipCanvasWithRect(Canvas canvas, Rect rect, {Offset offset}) {
+    Rect clipRect = rect;
+    if (offset != null) {
+      clipRect = clipRect.shift(offset);
+    }
+    if (_borderRadius != BorderRadius.zero) {
+      canvas.clipRRect(_clipRRectFromRect(clipRect));
+    } else {
+      canvas.clipRect(clipRect);
+    }
+  }
+
+  @override
+  void paintFeature(Canvas canvas, Matrix4 transform) {
+    final Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
+    Offset center = _position;
+    if (_repositionToReferenceBox)
+      center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
+    final Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    if (originOffset == null) {
+      canvas.save();
+      canvas.transform(transform.storage);
+      if (_clipCallback != null) {
+        _clipCanvasWithRect(canvas, _clipCallback());
+      }
+      canvas.drawCircle(center, _radius.value, paint);
+      canvas.restore();
+    } else {
+      if (_clipCallback != null) {
+        canvas.save();
+        _clipCanvasWithRect(canvas, _clipCallback(), offset: originOffset);
+      }
+      canvas.drawCircle(center + originOffset, _radius.value, paint);
+      if (_clipCallback != null)
+        canvas.restore();
+    }
+  }
+}
+
+double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Offset position) {
+  if (containedInkWell) {
+    final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
+    return _getSplashRadiusForPositionInSize(size, position);
+  }
+  return Material.defaultSplashRadius;
+}
+
+double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
+  final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
+  final double d2 = (position - bounds.topRight(Offset.zero)).distance;
+  final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
+  final double d4 = (position - bounds.bottomRight(Offset.zero)).distance;
+  return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
+}
+
+RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback) {
+  if (rectCallback != null) {
+    assert(containedInkWell);
+    return rectCallback;
+  }
+  if (containedInkWell)
+    return () => Offset.zero & referenceBox.size;
+  return null;
 }

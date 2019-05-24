@@ -21,7 +21,10 @@ const timeout = const Duration(seconds: 3);
 class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(home: new MyHome());
+    return MaterialApp(
+      theme: ThemeData(fontFamily: "Rubik"),
+      home: MyHome()
+    );
   }
 }
 
@@ -85,8 +88,6 @@ class MyHomeState extends State<MyHome> {
 
     print("Splash: " + global.cookie);
     String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
-    print("Splash Cookie:");
-    print(global.cookie);
     await http.post(url, headers: {"cookie": global.cookie}).then(
         (dynamic response) async {
       if (response.statusCode == 200) {
@@ -94,11 +95,17 @@ class MyHomeState extends State<MyHome> {
         final responseArr = json.decode(response.body);
 
         Route route = MaterialPageRoute(
-            builder: (context) => MainPage(loginInfo: responseArr));
+          builder: (context) => MainPage(loginInfo: responseArr["subjects"]));
         Navigator.pushReplacement(context, route);
+      } else if (response.statusCode == 401){
+        print("Splash: Authorisation error: Directing to login page...");
+
+        Route route = MaterialPageRoute(builder: (context) => LoginPage());
+        Navigator.pushReplacement(_context, route); //Direct back to login page
 
       } else {
         print("Splash: Error when retrieving page info");
+        print("Splash: Status code:" + response.statusCode.toString());
         setState(() {
           isOffline = true;
           offlineLoading = false;
@@ -112,6 +119,7 @@ class MyHomeState extends State<MyHome> {
     _context = context;
     global.phoneHeight = MediaQuery.of(context).size.height;
     global.phoneWidth = MediaQuery.of(context).size.width;
+    global.statusBarHeight = MediaQuery.of(context).padding.top;
 
     return hasLoggedIn
         ? (isOffline
@@ -149,7 +157,7 @@ class MyHomeState extends State<MyHome> {
                         setState(() {
                           offlineLoading = true;
                         });
-                        Timer(const Duration(milliseconds: 500), () {
+                        Timer(const Duration(milliseconds: 2000), () {
                           getPageInfo();
                         });
                       },

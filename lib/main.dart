@@ -34,6 +34,10 @@ void main() {
       .then((_) {
     runApp(Splash());
   });
+
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+    statusBarBrightness: Brightness.light // Light == Black status bar -- for IOS.
+  ));
 }
 
 const timeout = const Duration(seconds: 5);
@@ -56,15 +60,14 @@ class MainPageState extends State<MainPage> {
   StreamSubscription _connectionChangeStream;
   ConnectionStatusSingleton connectionStatus;
 
-  var backgroundOpacity;
-  var duration = 0;
+  double backgroundOpacity = 0.0;
+  int duration = 0;
 
   bool loading = false;
   bool isOffline = false;
 
   @override
   initState() {
-    print("Main: Started!");
     super.initState();
     connectionStatus = ConnectionStatusSingleton.getInstance();
     _connectionChangeStream =
@@ -86,13 +89,15 @@ class MainPageState extends State<MainPage> {
       return;
     }
 
-    final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
-    await http.post(mapUrl,
-      headers: {"Cookie": global.cookie}, body: {"courseCode" : widget.loginInfo[subIndex]["courseCode"]}
-    ).then((dynamic response) {
+    final String mapUrl =
+        "https://tinypingu.infocommsociety.com/api/exploremap";
+    await http.post(mapUrl, headers: {
+      "Cookie": global.cookie
+    }, body: {
+      "courseCode": widget.loginInfo[subIndex]["courseCode"]
+    }).then((dynamic response) {
       if (response.statusCode == 200) {
-        final responseArr = json.decode(response.body);
-        print(responseArr);
+        final responseMap = json.decode(response.body);
         // responseArr.forEach((subject) {
         // subject_map.chapData = subject["children"];
         // subject_map.activity_positions = [];
@@ -103,13 +108,12 @@ class MainPageState extends State<MainPage> {
         //   subject_map.activity_positions.add(padding.toDouble());
         // });
         // }); //This is to get the first subject which is Econs
-
-        final package = global.ExploreMapInfo(responseArr);
+        print("Main: Successly retrieved explore map info!");
         Route route = MaterialPageRoute(
-            builder: (context) => SubjectMap(mapInfo: package));
+            builder: (context) => SubjectMap(mapInfo: responseMap));
         Navigator.push(context, route);
-        print("Main: Success!");
       } else {
+        print("Main: " + response.statusCode.toString());
         print("Main: Error! Subject data not retrieved!");
       }
     });
@@ -128,12 +132,11 @@ class MainPageState extends State<MainPage> {
           borderRadius: BorderRadius.circular(28.0),
           boxShadow: [
             BoxShadow(
-                color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
+                color: Colors.grey, blurRadius: 4.0, offset: Offset(1.0, 2.0)),
           ],
         ),
-        width:
-            global.phoneWidth * 0.6, //Minus the padding of 32.0px on both sides
-        height: 56.0,
+        width: global.phoneWidth * 0.55, //Minus the padding of 32.0px on both sides
+        height: 48.0,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -151,9 +154,8 @@ class MainPageState extends State<MainPage> {
                         "Explore!",
                         style: TextStyle(
                             fontSize: 16.0,
-                            //fontWeight: FontWeight.w700,
                             color: Colors.white,
-                            fontFamily: "CarterOne"),
+                            fontFamily: "PoppinsBold"),
                       )
                     : SizedBox(
                         height: global.phoneHeight * 0.03,
@@ -178,98 +180,115 @@ class MainPageState extends State<MainPage> {
       });
     }
 
-    double statusBarHeight = MediaQuery.of(context).padding.top;
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size(
-            global.phoneWidth, global.bottomAppBarHeight + statusBarHeight),
-        child: Stack(
-          children: <Widget>[
-            AnimatedOpacity(
-              duration: Duration(milliseconds: duration),
-              opacity: backgroundOpacity ?? 0.0,
-              child: Container(
-                height: global.bottomAppBarHeight + statusBarHeight,
-                width: global.phoneWidth,
-                decoration: BoxDecoration(color: Colors.grey.shade800),
-              ),
+    Future<bool> _onWillPop() {
+      if (backgroundOpacity == 0.6) { //Card is expanded!
+        listKeys[currentPage]
+          .currentState
+          .changeCard(global.phoneWidth * 0.2 + 160.0, 0.0, -1);
+        return Future<bool>.value(false);
+      } else {
+        return Future<bool>.value(true);
+      }
+    }
+
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size(
+              global.phoneWidth, 
+              global.bottomAppBarHeight + global.statusBarHeight
             ),
-            GestureDetector(
-              onTap: () {
-                if (backgroundOpacity == 0.6)
-                  listKeys[currentPage]
-                      .currentState
-                      .changeCard(global.phoneWidth * 0.2 + 180.0, 0.0, -1);
-              },
-              child: Container(
-                padding: EdgeInsets.only(
-                    top: statusBarHeight + global.bottomAppBarHeight / 2 - 11,
-                    left: 28.0), //Minus 11, half of font size
-                height: global.bottomAppBarHeight + statusBarHeight,
-                width: global.phoneWidth,
-                child: Text("Studious",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: "CarterOne",
-                        fontSize: 24.0)),
-              ),
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: global.backgroundWhite,
-      body: PageView.builder(
-          physics: backgroundOpacity == 0.0
-              ? ScrollPhysics()
-              : NeverScrollableScrollPhysics(),
-          onPageChanged: (index) {
-            currentPage = index;
-            global.subindex = index;
-          },
-          itemCount: widget.loginInfo.length,
-          itemBuilder: (context, i) {
-            listKeys.add(new GlobalKey<ExpandableCardState>());
-            return ExpandableCard(
-                key: listKeys[i],
-                index: i,
-                loginInfo: widget.loginInfo[i],
-                notifyParent: refreshAppBar);
-          }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: exploreButton,
-      bottomNavigationBar: BottomAppBar(
-        elevation: 10.0,
-        color: global.appBarLightBlue,
-        child: Container(
-          height: 64.0,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
+          child: Stack(
             children: <Widget>[
-              PopupMenuButton<Choice>(
-                icon: Icon(
-                  Icons.more_vert,
-                  color: Colors.blueGrey.shade500,
+              AnimatedOpacity(
+                duration: Duration(milliseconds: duration),
+                opacity: backgroundOpacity ?? 0.0,
+                child: Container(
+                  height: global.bottomAppBarHeight + global.statusBarHeight,
+                  width: global.phoneWidth,
+                  decoration: BoxDecoration(color: Colors.grey.shade800),
                 ),
-                onSelected: select,
-                itemBuilder: (BuildContext context) {
-                  return choices.map((Choice choice) {
-                    return PopupMenuItem<Choice>(
-                      value: choice,
-                      child: Text(choice.title),
-                    );
-                  }).toList();
+              ),
+              GestureDetector(
+                onTap: () {
+                  if (backgroundOpacity == 0.6) //Card is Expanded!
+                    listKeys[currentPage]
+                        .currentState
+                        .changeCard(global.phoneWidth * 0.2 + 160.0, 0.0, -1);
                 },
+                child: Container(
+                  padding: EdgeInsets.only(
+                      top: global.statusBarHeight + global.bottomAppBarHeight / 2 - 11,
+                      left: 28.0), //Minus 11, half of font size
+                  height: global.bottomAppBarHeight + global.statusBarHeight,
+                  width: global.phoneWidth,
+                  child: Text("Studious",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: "CarterOne",
+                          fontSize: 22.0)),
+                ),
               ),
             ],
           ),
         ),
+        backgroundColor: global.backgroundWhite,
+        body: PageView.builder(
+            physics: backgroundOpacity == 0.0
+                ? ScrollPhysics()
+                : NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              currentPage = index;
+              global.subindex = index;
+            },
+            itemCount: widget.loginInfo.length,
+            itemBuilder: (context, i) {
+              listKeys.add(new GlobalKey<ExpandableCardState>());
+              return ExpandableCard(
+                  key: listKeys[i],
+                  index: i,
+                  loginInfo: widget.loginInfo[i],
+                  notifyParent: refreshAppBar);
+            }),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: exploreButton,
+        bottomNavigationBar: BottomAppBar(
+          elevation: 10.0,
+          color: global.appBarLightBlue,
+          child: Container(
+            height: 64.0,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                PopupMenuButton<Choice>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: Colors.blueGrey.shade500,
+                  ),
+                  onSelected: select,
+                  itemBuilder: (BuildContext context) {
+                    return choices.map((Choice choice) {
+                      return PopupMenuItem<Choice>(
+                        value: choice,
+                        child: Text(choice.title),
+                      );
+                    }).toList();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+     
   }
 
   void select(Choice choice) async {
     if (choice.title == "Log out") {
+      print("Main: Log out");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       global.studentID = "";
       global.cookie = "";
@@ -279,9 +298,11 @@ class MainPageState extends State<MainPage> {
       Route route = MaterialPageRoute(builder: (context) => LoginPage());
       Navigator.pushReplacement(context, route);
     } else if (choice.title == "Profile") {
+      print("Main: Profile");
       Route route = MaterialPageRoute(builder: (context) => ProfilePage());
       Navigator.push(context, route);
     } else if (choice.title == "Settings") {
+      print("Main: Settings");
       Route route = MaterialPageRoute(builder: (context) => SettingsPage());
       Navigator.push(context, route);
     }
@@ -299,20 +320,18 @@ class ExpandableCard extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return ExpandableCardState(index);
+    return ExpandableCardState();
   }
 }
 
-class ExpandableCardState extends State<ExpandableCard> with SingleTickerProviderStateMixin {
-  int index;
-  ExpandableCardState(this.index);
-
+class ExpandableCardState extends State<ExpandableCard>
+    with SingleTickerProviderStateMixin {
   bool cardOpen = false;
   double backgroundOpacity = 0.0;
   int duration = 0;
 
   static double maxCardHeight = global.phoneHeight * 0.75;
-  static double minCardHeight = global.phoneWidth* 0.2 + 180.0;
+  static double minCardHeight = global.phoneWidth * 0.2 + 160.0;
 
   double cardHeight = minCardHeight;
   double initialCardHeight = minCardHeight;
@@ -323,12 +342,18 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
   AnimationController arrowController;
 
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
-  List<String> chapters = ["Hello world", "Hi I'm zheng hong", "Bye bye"];
+  List<String> chapters = [];
   List<String> shownChapters = [];
   static double listTileHeight = 20.0;
 
   @override
   void initState() {
+    chapters.add("first");
+    widget.loginInfo["chapters"].forEach((chap) {
+      chapters.add(chap["name"]);
+      chapters.add("");
+    });
+    if (chapters.isNotEmpty) chapters.removeLast();
     arrowController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 500),
@@ -347,9 +372,22 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
     cardOpen = (opacity == 0.0) ? false : true;
 
     if (!cardOpen) {
-      setState(() {
-        shownChapters = [];
-      });
+      //* Remove all chapter names from overview list
+      for (int i = 0; i < chapters.length; i++) {
+        if (shownChapters.isNotEmpty) {
+          var chap = shownChapters.removeAt(0);
+          _listKey.currentState.removeItem(
+            0,
+            (BuildContext context, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: buildOverviewBox(chap, i, false, false),
+              );
+            },
+            duration: Duration(milliseconds: 100),
+          );
+        }
+      }
     }
 
     setState(() {
@@ -360,10 +398,16 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
     });
 
     if (cardOpen) {
-      Timer(Duration(milliseconds: 300), () {
-        setState(() {
-          shownChapters = chapters;
-        });
+      Timer(Duration(milliseconds: 300), () async {
+        //* Populate chapter names in overview list
+        for (int i = 0; i < chapters.length; i++) {
+          int index = shownChapters.length;
+          if (index == chapters.length) break;
+          shownChapters.add(chapters[index]);
+          _listKey.currentState
+              .insertItem(index, duration: Duration(milliseconds: 300));
+          await new Future.delayed(const Duration(milliseconds: 50));
+        }
       });
     }
 
@@ -377,20 +421,29 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
+    double iconWidth;
+    double iconPadding = 6.0;
+
+    if (global.phoneHeight * 0.7 - 220 > global.phoneWidth * 0.75) {
+      iconWidth = global.phoneWidth * 0.75;
+      iconPadding = (global.phoneHeight * 0.3 - iconWidth + 160) / 2;
+    }
+    else iconWidth = global.phoneHeight * 0.7 - 220;
+
     return Stack(children: <Widget>[
       Positioned(
         child: Align(
             alignment: FractionalOffset.topCenter,
             child: Container(
-                padding: EdgeInsets.only(),
-                child: Container(
-                  height: global.phoneHeight * 0.7 - 224,
-                  width: global.phoneHeight * 0.7 - 224,
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage('images/Econs.png'),
-                    backgroundColor: Colors.transparent,
-                  ),
-                ))),
+              margin: EdgeInsets.only(top: iconPadding),
+              height: iconWidth,
+              width: iconWidth,
+              child: CircleAvatar(
+                backgroundImage: AssetImage('images/Econs.png'),
+                backgroundColor: Colors.transparent, 
+              ),
+            ) 
+          )
       ),
       Positioned(
         child: Align(
@@ -443,10 +496,6 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
                 duration = 0;
                 widget.notifyParent(backgroundOpacity, duration);
               });
-              
-              // int index = shownChapters.length;
-              // shownChapters.add(chapters[index]);
-              // _listKey.currentState.insertItem(index, duration: Duration(milliseconds: 500));
             },
             onVerticalDragEnd: (details) {
               double benchmark =
@@ -495,7 +544,7 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
                     topLeft: Radius.circular(16.0),
                     topRight: Radius.circular(16.0)),
                 color: Theme.of(context).cardColor,
-                elevation: 2.0,
+                elevation: 4.0,
                 child: Column(children: <Widget>[
                   InkWell(
                       borderRadius: BorderRadius.circular(16.0),
@@ -515,7 +564,7 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
                         child: Icon(
                           Icons.keyboard_arrow_up,
                           color: Colors.grey,
-                          size: 32.0,
+                          size: 28.0,
                         ),
                         builder: (BuildContext context, Widget _widget) {
                           return Transform.rotate(
@@ -525,17 +574,17 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
                         },
                       )),
                   Text(
-                    "H2 Economics" ?? "",
+                    widget.loginInfo["name"] ?? "",
                     style: TextStyle(
                       fontSize: 22.0,
-                      fontWeight: FontWeight.w500,
+                      fontFamily: "PoppinsSemiBold",
                     ),
-                  ), 
+                  ),
                   Padding(
                     padding: EdgeInsets.only(
                       left: global.phoneWidth * 0.3,
                       right: global.phoneWidth * 0.3,
-                      bottom: 16.0,
+                      bottom: 12.0,
                     ),
                     child: Divider(
                       color: Colors.grey,
@@ -543,66 +592,50 @@ class ExpandableCardState extends State<ExpandableCard> with SingleTickerProvide
                     ),
                   ),
                   Text(
-                    "Level 4: Novice",
+                    "Level " + widget.loginInfo["level"]["id"].toString() + ": " + widget.loginInfo["level"]["name"],
                     style: TextStyle(fontSize: 18.0),
                   ),
                   LinearPercentIndicator(
                     backgroundColor: Color(0x40F28752),
-                    padding: EdgeInsets.symmetric(horizontal: 32.0, vertical: 12.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0),
                     linearStrokeCap: LinearStrokeCap.roundAll,
-                    percent: 0.5,
+                    percent: widget.loginInfo["xp"] / widget.loginInfo["maxXp"],
                     progressColor: Color(0xFFF28752),
                     lineHeight: 6.0,
                   ),
-                  // SizedBox(height: 20.0),
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        buildInfoBox("#10", "position"),
-                        buildInfoBox("50%", "complete"),
-                        buildInfoBox("6/10", "tests remaining"),
+                        buildInfoBox(widget.loginInfo["left"].toString(),
+                            "activities remaining"),
+                        buildInfoBox(
+                            widget.loginInfo["completed"].toString() + "%",
+                            "complete"),
+                        buildInfoBox((widget.loginInfo["maxXp"] - widget.loginInfo["xp"]).toString(), "XP to\nlevel up!"),
                       ],
                     ),
                   ),
-                  // AnimatedList(
-                  //   key: _listKey,
-                  //   shrinkWrap: true,
-                  //   initialItemCount: 0,
-                  //   itemBuilder: (BuildContext context, int index, Animation animation) {
-                  //     return FadeTransition(
-                  //       opacity: animation,
-                  //       child: ListTile(
-                  //         title: Text(shownChapters[index]),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                   Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 32.0,),
-                      child: ListView.builder(
-                        shrinkWrap: true,              
-                        itemCount: shownChapters.length,
-                        itemBuilder: (context, i) {
-                          return ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 0.0, vertical: 4.0),
-                            title: Text(shownChapters[i]),
-                            // subtitle: Text("data"),
-                            leading: SizedBox(
-                              height: 32.0,
-                              width: 32.0,
-                              child: Material(
-                                elevation: 2.0,
-                                borderRadius: BorderRadius.circular(16.0),
-                                color: Colors.green,
-                              ),
-                            )
-                          );
-                        },
-                      ),
-                    )
+                    child: AnimatedList(
+                      padding: EdgeInsets.symmetric(horizontal: 24.0),
+                      key: _listKey,
+                      shrinkWrap: true,
+                      initialItemCount: 0,
+                      itemBuilder: (BuildContext context, int index,
+                          Animation animation) {
+                        return FadeTransition(
+                            opacity: animation,
+                            child: buildOverviewBox(
+                              shownChapters[index],
+                              index,
+                              (index == chapters.length - 1) ? true : false,
+                              widget.loginInfo["done"] ?? false,
+                            ));
+                      },
+                    ),
                   ),
                 ]),
               ),
@@ -630,21 +663,81 @@ Widget buildInfoBox(String bigText, String smallText) {
     child: Material(
         borderRadius: BorderRadius.circular(2.0),
         child: Center(
-            child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(bigText,
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-            SizedBox(height: 2.0),
-            Text(smallText,
-              style: TextStyle(
-                fontSize: 12.0,
+            child: Padding(
+          padding: EdgeInsets.all(4.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(bigText,
+                  style:
+                      TextStyle(fontSize: 16.0, fontFamily: "PoppinsBold")),
+              Text(
+                smallText,
+                style: TextStyle(
+                  fontSize: 12.0,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ))),
   );
+}
+
+Widget buildOverviewBox(String chapter, int index, bool last, bool done) {
+  if (index == 0) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 4.0, top: 8.0),
+        child: Text("Overview",
+        style: TextStyle(
+          fontFamily: "PoppinsSemiBold"
+        )
+      ),
+    );
+  }
+  return (chapter != "")
+      ? ListTile(
+        dense: true,
+          contentPadding:
+              last ? EdgeInsets.only(bottom: 20.0) : EdgeInsets.all(0.0),
+          title: Text(chapter, style: TextStyle(fontSize: 14.0)),
+          leading: SizedBox(
+            height: 36.0,
+            width: 36.0,
+            child: Material(
+              elevation: 2.0,
+              color: Colors.transparent,
+              type: MaterialType.circle,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient:
+                      done ? global.greenDiagonalGradient : global.blueGradient,
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Center(
+                    child: done
+                        ? Icon(
+                            Icons.done,
+                            color: Colors.white,
+                            size: 20,
+                          )
+                        : Text((index ~/ 2 + 1).toString(),
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 14.0))),
+              ),
+            ),
+          ))
+      : Container(
+          height: 16.0,
+          child: Container(
+            margin: EdgeInsets.only(
+                left: 18.0, right: global.phoneWidth * 0.9 - 67.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(1.0),
+              color: Color(0x50000000),
+            ),
+          ),
+        );
 }
 
 class Choice {

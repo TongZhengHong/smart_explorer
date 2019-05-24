@@ -20,6 +20,7 @@ dependencies:
   percent_indicator: ^1.0.16
   shared_preferences: ^0.5.2
   connectivity: ^0.4.3+1
+  path_drawing: ^0.4.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,6 +41,7 @@ flutter:
   assets:
    - images/vs_code.png
    - images/Econs.png
+   - images/econsIcon.png
 
   fonts:
     - family: Nunito
@@ -57,6 +59,18 @@ flutter:
     - family: CarterOne
       fonts:
         - asset: fonts/CarterOne.ttf
+
+    - family: Rubik
+      fonts:
+        - asset: fonts/Rubik-Regular.ttf
+
+    - family: PoppinsSemiBold
+      fonts:
+        - asset: fonts/Poppins-SemiBold.ttf
+
+    - family: PoppinsBold
+      fonts:
+        - asset: fonts/Poppins-Bold.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

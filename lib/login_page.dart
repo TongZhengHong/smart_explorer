@@ -13,7 +13,7 @@ import 'dart:convert';
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new LoginPageState();
+    return LoginPageState();
   }
 }
 
@@ -64,7 +64,7 @@ class LoginPageState extends State<LoginPage> {
         print("Login: SUCCESS");
         Route route = MaterialPageRoute(
             builder: (context) =>
-                MainPage(loginInfo: reponseArr));
+                MainPage(loginInfo: reponseArr["subjects"]));
         Navigator.pushReplacement(context, route);
       } else {
         setState(() {
@@ -104,23 +104,13 @@ class LoginPageState extends State<LoginPage> {
         print("Login: Correct username & password");
         global.studentID = username;
         String rawCookie = response.headers['set-cookie'];
-        print("Cookie:");
-        print(rawCookie);
-
-        print("Login: Cookie Set!");
-
         int index = rawCookie.indexOf(';');
 
         global.cookie =
             (index == -1) ? rawCookie : rawCookie.substring(0, index);
         final responseMap = json.decode(response.body);
-        print(responseMap);
         global.studentName = responseMap["Name"];
         global.studentEmail = responseMap["Email"];
-
-        print(global.studentName);
-        print(global.studentEmail);
-        print("Login: Student info retrieved!!!!!");
 
         List<String> info = [
           global.studentID,
@@ -188,6 +178,7 @@ class LoginPageState extends State<LoginPage> {
     final Widget usernameTextField = Theme(
         data: ThemeData(primaryColor: Colors.black38),
         child: TextField(
+          style: TextStyle(fontFamily: "Rubik"),
           onChanged: (text) {
             setState(() {
               validateUsernameEmpty = false;
@@ -217,6 +208,7 @@ class LoginPageState extends State<LoginPage> {
             labelText: "Username",
             labelStyle: TextStyle(
               fontSize: 14.0,
+              fontFamily: "Rubik",
             ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: global.blue),
@@ -232,6 +224,7 @@ class LoginPageState extends State<LoginPage> {
           primaryColor: Colors.black38,
         ),
         child: TextField(
+          style: TextStyle(fontFamily: "Rubik"),
             onChanged: (text) {
               setState(() {
                 validatePasswordEmpty = false;
@@ -261,6 +254,7 @@ class LoginPageState extends State<LoginPage> {
               labelText: "Password",
               labelStyle: TextStyle(
                 fontSize: 14.0,
+                fontFamily: "Rubik",
               ),
               focusedBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: global.blue),
@@ -284,6 +278,7 @@ class LoginPageState extends State<LoginPage> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
+            borderRadius: BorderRadius.circular(4.0),
             onTap: () {
               setState(() {
                 validateUsernameEmpty =
@@ -300,7 +295,6 @@ class LoginPageState extends State<LoginPage> {
                 });
               }
             },
-            borderRadius: BorderRadius.circular(4.0),
             child: Center(
               child: Center(
                 child: !loading
@@ -308,7 +302,7 @@ class LoginPageState extends State<LoginPage> {
                         "SIGN IN",
                         style: TextStyle(
                           fontSize: 14.0,
-                          fontWeight: FontWeight.w700,
+                          fontFamily: "PoppinsSemiBold",
                           color: Colors.white,
                         ),
                       )
@@ -344,7 +338,7 @@ class LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 CustomPaint(
                   size: Size(global.phoneWidth, global.phoneHeight * 0.4),
-                  painter: MyPainter(),
+                  painter: LoginPainter(),
                 ),
                 SizedBox(
                   height: 64.0,
@@ -376,69 +370,66 @@ class LoginPageState extends State<LoginPage> {
   }
 }
 
-class MyPainter extends CustomPainter {
+class LoginPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    double height = size.height;
-    double width = size.width;
-
     //! Add the ORANGE gradient
-    Rect rect = Rect.fromLTWH(0.0, 0.0, width, height * 0.4);
+    Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height * 0.4);
     Gradient gradient = LinearGradient(
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
         colors: [Color(0xFFFAD87B), Color(0xFFF28752)]);
     Paint paint = Paint()..shader = gradient.createShader(rect);
-    final path1 = drawPathMid(width * 0.8, height * 0.3);
+    final path1 = drawPathMid(size.width * 0.8, size.height * 0.3);
     canvas.drawShadow(path1, Colors.black, 2.0, true);
     canvas.drawPath(path1, paint);
 
     //! Add the RED gradient
-    rect = Rect.fromLTWH(0.0, 0.0, width, height * 0.6);
+    rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height * 0.6);
     gradient = LinearGradient(
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
         colors: [Color(0xFFF48149), Color(0xFFEB4956)]);
     paint = Paint()..shader = gradient.createShader(rect);
-    final path2 = drawPathMid(width * 1, height * 0.55);
+    final path2 = drawPathMid(size.width * 1, size.height * 0.55);
     canvas.drawShadow(path2, Colors.black, 2.0, true);
     canvas.drawPath(path2, paint);
 
     //! Add the GREEN gradient
-    rect = Rect.fromLTWH(0.0, 0.0, width, height * 0.25);
+    rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height * 0.25);
     gradient = LinearGradient(
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
         colors: [Color(0xFF4AE296), Color(0xFF57CDDB)]);
     paint = Paint()..shader = gradient.createShader(rect);
-    final path3 = drawPathMid(width * 0.4, height * 0.1);
+    final path3 = drawPathMid(size.width * 0.4, size.height * 0.1);
     canvas.drawShadow(path3, Colors.black, 2.0, true);
     canvas.drawPath(path3, paint);
 
     //! Add LEFT side LIGTHT BLUE gradient
-    rect = Rect.fromLTWH(0.0, 0.0, width, height * 0.8);
+    rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height * 0.8);
     gradient = LinearGradient(
         begin: FractionalOffset.center,
         end: FractionalOffset.bottomCenter,
         colors: [Color(0xFF78B2FA), Color(0xFFCDD6F0)]);
     paint = Paint()..shader = gradient.createShader(rect);
-    final path4 = drawPathSide(height * 0.55, height * 0.01, true);
+    final path4 = drawPathSide(size.height * 0.55, size.height * 0.01, true);
     canvas.drawShadow(path4, Colors.black, 2.0, true);
     canvas.drawPath(path4, paint);
 
     //! Add RIGHT side BLUE PURPLE gradient
-    rect = Rect.fromLTWH(0.0, 0.0, width, height * 0.55);
+    rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height * 0.55);
     gradient = LinearGradient(
         begin: FractionalOffset.center,
         end: FractionalOffset.bottomCenter,
         colors: [Color(0xFF78B5FA), Color(0xFF9586FD)]);
     paint = Paint()..shader = gradient.createShader(rect);
-    final path5 = drawPathSide(height * 0.2, height * 0.01, false);
+    final path5 = drawPathSide(size.height * 0.2, size.height * 0.01, false);
     canvas.drawShadow(path5, Colors.black, 2.0, true);
     canvas.drawPath(path5, paint);
 
     //! Add RIGHT side BLUE circle
-    rect = Rect.fromLTRB(0.0, height * 0.6, width, height * 0.8);
+    rect = Rect.fromLTRB(0.0, size.height * 0.6, size.width, size.height * 0.8);
     gradient = LinearGradient(
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
@@ -447,7 +438,7 @@ class MyPainter extends CustomPainter {
     final path6 = Path();
     path6.addArc(
         Rect.fromCircle(
-            center: Offset(width, height),
+            center: Offset(size.width, size.height),
             radius: global.phoneWidth * 0.06),
         0,
         2 * Math.pi);
@@ -455,7 +446,7 @@ class MyPainter extends CustomPainter {
     canvas.drawPath(path6, paint);
 
     //! Add LEFT side BLUE circle
-    rect = Rect.fromLTRB(0.0, height * 0.2, width, height * 0.4);
+    rect = Rect.fromLTRB(0.0, size.height * 0.2, size.width, size.height * 0.4);
     gradient = LinearGradient(
         begin: FractionalOffset.topCenter,
         end: FractionalOffset.bottomCenter,
@@ -464,7 +455,7 @@ class MyPainter extends CustomPainter {
     final path7 = Path();
     path7.addArc(
         Rect.fromCircle(
-            center: Offset(width * 0.1, height * 0.25),
+            center: Offset(size.width * 0.1, size.height * 0.25),
             radius: global.phoneWidth * 0.03),
         0,
         2 * Math.pi);
@@ -474,31 +465,31 @@ class MyPainter extends CustomPainter {
     //! Add 4 dark blue circles!
     paint = Paint();
     paint.color = global.darkBlue;
-    final path8 = drawQuadCircles(width*0.45, height*0.5);
+    final path8 = drawQuadCircles(size.width*0.45, size.height*0.5);
     canvas.drawShadow(path8, Colors.black, 2.0, true);
     canvas.drawPath(path8, paint);
 
     //! Hello there Paragraph!
     var paragraphStyle = ui.ParagraphStyle(
         fontSize: 36.0, textAlign: TextAlign.left, fontWeight: FontWeight.w800);
-    var textStyle = ui.TextStyle(color: Colors.black);
+    var textStyle = ui.TextStyle(color: Colors.black, fontFamily: "PoppinsBold");
     var paragraphBuilder = ui.ParagraphBuilder(paragraphStyle)
       ..pushStyle(textStyle)
       ..addText('Hello there!');
     var paragraph = paragraphBuilder.build()
-      ..layout(ui.ParagraphConstraints(width: width * 0.8));
-    canvas.drawParagraph(paragraph, Offset(32.0, height * 0.85));
+      ..layout(ui.ParagraphConstraints(width: size.width * 0.8));
+    canvas.drawParagraph(paragraph, Offset(32.0, size.height * 0.85));
 
     //! Subtitle Paragraph!
     paragraphStyle = ui.ParagraphStyle(
-        fontSize: 16.0, textAlign: TextAlign.left, fontWeight: FontWeight.w900);
-    textStyle = ui.TextStyle(color: Colors.black38);
+        fontSize: 14.0, textAlign: TextAlign.left, fontWeight: FontWeight.w900);
+    textStyle = ui.TextStyle(color: Colors.black38, fontFamily: "PoppinsSemiBold");
     paragraphBuilder = ui.ParagraphBuilder(paragraphStyle)
       ..pushStyle(textStyle)
-      ..addText('Explore the endless possibilies...');
+      ..addText('Explore the endless possibilities . . .');
     paragraph = paragraphBuilder.build()
-      ..layout(ui.ParagraphConstraints(width: width * 0.8));
-    canvas.drawParagraph(paragraph, Offset(32.0, height * 0.85 + 48.0));
+      ..layout(ui.ParagraphConstraints(width: size.width * 0.8));
+    canvas.drawParagraph(paragraph, Offset(32.0, size.height * 0.85 + 48.0));
   }
 
   @override
