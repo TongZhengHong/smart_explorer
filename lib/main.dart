@@ -56,7 +56,7 @@ class MainPageState extends State<MainPage> {
   StreamSubscription _connectionChangeStream;
   ConnectionStatusSingleton connectionStatus;
 
-  var backgroundOpacity;
+  var backgroundOpacity = 0.0;
   var duration = 0;
 
   bool loading = false;
@@ -88,7 +88,7 @@ class MainPageState extends State<MainPage> {
 
     final String mapUrl = "https://tinypingu.infocommsociety.com/api/exploremap";
     await http.post(mapUrl,
-      headers: {"Cookie": global.cookie}, body: {"courseCode" : widget.loginInfo[subIndex]["courseCode"]}
+      headers: {"Cookie": global.cookie}, body: {"courseCode" : widget.loginInfo["subjects"][subIndex]["courseCode"]}
     ).then((dynamic response) {
       if (response.statusCode == 200) {
         final responseArr = json.decode(response.body);
@@ -226,7 +226,7 @@ class MainPageState extends State<MainPage> {
             currentPage = index;
             global.subindex = index;
           },
-          itemCount: widget.loginInfo.length,
+          itemCount: widget.loginInfo["subjects"].length,
           itemBuilder: (context, i) {
             listKeys.add(new GlobalKey<ExpandableCardState>());
             return ExpandableCard(

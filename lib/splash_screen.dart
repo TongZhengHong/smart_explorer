@@ -97,7 +97,12 @@ class MyHomeState extends State<MyHome> {
             builder: (context) => MainPage(loginInfo: responseArr));
         Navigator.pushReplacement(context, route);
 
-      } else {
+      } else if (response.statusCode == 401){
+        Route route = MaterialPageRoute(builder: (context) => LoginPage());
+        Navigator.pushReplacement(context, route);
+      }
+      
+      else {
         print("Splash: Error when retrieving page info");
         setState(() {
           isOffline = true;

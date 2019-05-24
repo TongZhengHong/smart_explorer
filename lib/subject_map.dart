@@ -41,10 +41,11 @@ class SubjectMapState extends State<SubjectMap> {
   var act;
   bool _loading = false;
 
-  void getPageData(int position, int id) async {
+  void getPageData(int position, int id, int cNum) async {
     final String mapUrl = "https://tinypingu.infocommsociety.com/api/getactivity";
     print("Entered!");
     print("ID:");
+    print(id);
     await http.post(mapUrl, headers: {"Cookie": global.cookie}, body: {"id" : id.toString()})
     .then((dynamic response) {
       //print(response.statusCode);
@@ -52,14 +53,15 @@ class SubjectMapState extends State<SubjectMap> {
         final responseArr = json.decode(response.body);
         actPages = responseArr["pages"];
         act = responseArr;
-        print(responseArr);
+        print(widget.mapInfo.chapData);
         print("Activity: Success!");
+        Route route = MaterialPageRoute(builder: (context) => ActivityPage(chptPos[position], act, actPages, widget.mapInfo.chapData[cNum]));
+        Navigator.push(context, route);
       } else {
         print("Activity: Error! Page data not retrieved!");
       }
     });
-    Route route = MaterialPageRoute(builder: (context) => ActivityPage(chptPos[position], act, actPages));
-    Navigator.push(context, route);
+    
 
     setState(() {
       _loading = false;
@@ -68,12 +70,14 @@ class SubjectMapState extends State<SubjectMap> {
 
   List activities = [];
   List chptPos = [];
+  List chptNum = [];
   //NOTE: Activities are here!!
 
   @override
   Widget build(BuildContext context) {
     //NOTE: Initialising all the activities
     int itemCnt = 0;
+    int chapNum = 0;
     //print("DEBUG!!!");
     //print(widget.mapInfo.chapData);
     widget.mapInfo.chapData.forEach((chapter){
@@ -85,7 +89,9 @@ class SubjectMapState extends State<SubjectMap> {
         activities.add(activity);
         chptPos.add(cnt);
         cnt++;
+        chptNum.add(chapNum);
       });
+      chapNum++;
     });
     print(activities);
 
@@ -264,7 +270,7 @@ class SubjectMapState extends State<SubjectMap> {
                     });
                     //print("TESTING TESTING");
                     //print(activities[position]["children"]);
-                    this.getPageData(position, activities[position]["id"]);
+                    this.getPageData(position, activities[position]["id"], chptNum[position]);
                   },
                   borderRadius: BorderRadius.circular(24.0),
                   child: Center(
