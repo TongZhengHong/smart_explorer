@@ -8,6 +8,7 @@ import 'package:smart_explorer/main.dart';
 
 int subindex = 0;
 int chapindex = 0;
+int score = 0;
 List<String> subjects = ["H2 Economics", "H2 Math", "H2 Chemistry", "H2 Physics"];
 String studentID = "";
 String studentName = "";

@@ -28,6 +28,8 @@ class SubjectMapState extends State<SubjectMap> {
 
   List activities = [];
   List chptPos = [];
+  List chptNum = [];
+
   List<double> activityPositions = [];
   Map<int, String> chapterDesc = {};
 
@@ -44,6 +46,7 @@ class SubjectMapState extends State<SubjectMap> {
     //! Populate information into chptPos and activities arrays
     widget.mapInfo["children"].forEach((chapter) {
       int cnt = 0;
+      int chapNum = 0;
       // chapterDesc[itemCnt] = chapter["dsc"];
       itemCnt += chapter["children"].length;
       chapter["children"].forEach((activity) {
@@ -51,7 +54,9 @@ class SubjectMapState extends State<SubjectMap> {
         activities.add(null); //This is to signify the line b/w 2 points/activity
         chptPos.add(cnt);
         cnt++;
+        chptNum.add(chapNum);
       });
+      chapNum++;
     });
     itemCnt = itemCnt * 2 - 1; //Account for separators in b/w 2 points
     activities.removeLast();
@@ -249,6 +254,8 @@ class SubjectMapState extends State<SubjectMap> {
       pageBuilder: (context, animation1, animation2) {
         return ActivityDialog(
           position: position,
+          chapNum: chptNum,
+
           activities: activities,
           posInChap: chptPos,
         );
@@ -267,12 +274,14 @@ class SubjectMapState extends State<SubjectMap> {
 
 class ActivityDialog extends StatefulWidget {
   final int position;
+  final List chapNum;
   final List activities;
   final List posInChap;
 
   ActivityDialog(
       {Key key,
       @required this.position,
+      @required this.chapNum,
       @required this.activities,
       @required this.posInChap})
       : super(key: key);
@@ -286,7 +295,7 @@ class ActivityDialog extends StatefulWidget {
 class ActivityDialogState extends State<ActivityDialog> {
   bool _loading = false;
 
-  void getPageData(int position, int id) async {
+  void getPageData(int position, int id, int cNum) async {
     final String mapUrl =
         "https://tinypingu.infocommsociety.com/api/getactivity";
     await http.post(mapUrl,
@@ -300,7 +309,7 @@ class ActivityDialogState extends State<ActivityDialog> {
 
         Route route = MaterialPageRoute(
             builder: (context) =>
-                ActivityPage(widget.posInChap[widget.position], act, actPages));
+                ActivityPage(widget.posInChap[widget.position], act, actPages, "Testing"));
         Navigator.pushReplacement(context, route);
       } else {
         print("Activity: Error! Page data not retrieved!");
@@ -375,7 +384,7 @@ class ActivityDialogState extends State<ActivityDialog> {
                       });
                       Timer(Duration(milliseconds: 1000), () {
                         this.getPageData(widget.position,
-                            widget.activities[widget.position]["id"]);
+                            widget.activities[widget.position]["id"], widget.chapNum[widget.position]);
                       });
                     },
                     child: Center(

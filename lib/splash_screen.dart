@@ -103,7 +103,12 @@ class MyHomeState extends State<MyHome> {
         Route route = MaterialPageRoute(builder: (context) => LoginPage());
         Navigator.pushReplacement(_context, route); //Direct back to login page
 
-      } else {
+      } else if (response.statusCode == 401){
+        Route route = MaterialPageRoute(builder: (context) => LoginPage());
+        Navigator.pushReplacement(context, route);
+      }
+      
+      else {
         print("Splash: Error when retrieving page info");
         print("Splash: Status code:" + response.statusCode.toString());
         setState(() {
