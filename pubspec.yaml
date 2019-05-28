@@ -39,23 +39,9 @@ flutter:
   uses-material-design: true
 
   assets:
-   - images/Econs.png
-   - images/econsIcon.png
    - images/test.png
 
   fonts:
-    - family: Nunito
-      fonts:
-        - asset: fonts/Nunito-Regular.ttf
-        - asset: fonts/Nunito-Italic.ttf
-          style: italic
-        - asset: fonts/Nunito-Bold.ttf
-          weight: 700
-
-    - family: Audiowide
-      fonts:
-        - asset: fonts/Audiowide-Regular.ttf
-
     - family: CarterOne
       fonts:
         - asset: fonts/CarterOne.ttf
