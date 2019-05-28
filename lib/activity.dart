@@ -9,23 +9,20 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
-import 'package:smart_explorer/subject_map.dart' as subject_map;
-import 'package:smart_explorer/subject_popup.dart';
+import 'package:smart_explorer/explore_map.dart' as subject_map;
 import 'package:smart_explorer/settings.dart';
 import 'package:smart_explorer/profile.dart';
 
 import 'package:smart_explorer/global.dart' as global;
 import 'package:http/http.dart' as http;
 
-String chptName;
-
 class ActivityPage extends StatefulWidget {
   final int actNum;
   final actData;
   final pageData;
-  final chptData;
+  final chptName;
 
-  ActivityPage(this.actNum, this.actData, this.pageData, this.chptData);
+  ActivityPage(this.actNum, this.actData, this.pageData, this.chptName);
 
   @override
   State<StatefulWidget> createState() {
@@ -67,8 +64,6 @@ class ActivityPageState extends State<ActivityPage> {
       if (pageData[i]["type"] == "mcq") quesNum.add(cnt++);
       else quesNum.add(0);
     }
-    chptName = "hi";
-    chptName = widget.chptData["name"];
     //this.getPageData(actData["children"][0]);
     for (int j=0; j<pageData.length; j++){
       optCnt.add(pageData[j]["options"].length);
@@ -205,7 +200,7 @@ class ActivityPageState extends State<ActivityPage> {
                               width: global.phoneWidth * 0.5,
                               child: Center(
                                 child: Text(
-                                  chptName,
+                                  widget.chptName,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: "PoppinsSemiBold",

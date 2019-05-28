@@ -39,9 +39,9 @@ flutter:
   uses-material-design: true
 
   assets:
-   - images/vs_code.png
    - images/Econs.png
    - images/econsIcon.png
+   - images/test.png
 
   fonts:
     - family: Nunito

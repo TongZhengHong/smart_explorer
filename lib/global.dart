@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 //import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:smart_explorer/subject_map.dart';
+import 'package:smart_explorer/explore_map.dart';
 import 'package:smart_explorer/main.dart';
 
 int subindex = 0;
@@ -36,32 +36,50 @@ Color appBarLightBlue = const Color(0xFFCDD6F0);
 Color backgroundWhite = const Color(0xFFF6F8FC);
 Color darkBlue = const Color(0xFF1B417C);
 
-LinearGradient blueGradient = new LinearGradient(
+LinearGradient blueGradient = LinearGradient(
   colors: [Color(0xFF78B5FA), Color(0xFF7DA2FF)]
 );
 
-LinearGradient blueButtonGradient = new LinearGradient(
+LinearGradient blueButtonGradient = LinearGradient(
   colors: [Color(0xFF78B5FA), Color(0xFF9586FD)]
 );
 
-LinearGradient redGradient = new LinearGradient(
+LinearGradient redGradient = LinearGradient(
   colors: [Color(0xFFEB4956), Color(0xFFF48149)]
 );
 
-LinearGradient greenGradient = new LinearGradient(
+LinearGradient greenGradient = LinearGradient(
   colors: [Color(0xFF57CDDB), Color(0xFF4AE296)]
 );
 
-LinearGradient bluePurpleDiagonalGradient = new LinearGradient(
+LinearGradient redDiagonalGradient = LinearGradient(
+  begin: FractionalOffset.topRight,
+  end: FractionalOffset.bottomLeft,
+  colors: [Color(0xFFEB4956), Color(0xFFF48149)]
+);
+
+LinearGradient greenDiagonalGradient = LinearGradient(
+  begin: FractionalOffset.topRight,
+  end: FractionalOffset.bottomLeft,
+  colors: [Color(0xFF4AE296), Color(0xFF57CDDB)]
+);
+
+Gradient orangeDiagonalGradient = LinearGradient(
+  begin: FractionalOffset.topRight,
+  end: FractionalOffset.bottomLeft,
+  colors: [Color(0xFFFAD87B), Color(0xFFF28752)]
+);
+
+LinearGradient bluePurpleDiagonalGradient = LinearGradient(
   begin: FractionalOffset.bottomLeft,
   end: FractionalOffset.topRight,
   colors: [Color(0xFF78B5FA), Color(0xFF9586FD)]
 );
 
-LinearGradient greenDiagonalGradient = new LinearGradient(
+Gradient pinkDiagonalGradient = LinearGradient(
   begin: FractionalOffset.bottomLeft,
   end: FractionalOffset.topRight,
-  colors: [Color(0xFF4AE296), Color(0xFF57CDDB)]
+  colors: [Color(0xFFED4264), Color(0xFFff9472)]
 );
 
 Widget createGradientButton(LinearGradient gradient, double height, double width, BuildContext context, Widget route, String content){

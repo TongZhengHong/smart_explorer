@@ -9,8 +9,7 @@ import 'package:smart_explorer/internet.dart';
 
 import 'package:smart_explorer/splash_screen.dart';
 import 'package:smart_explorer/login_page.dart';
-import 'package:smart_explorer/subject_map.dart';
-import 'package:smart_explorer/subject_popup.dart';
+import 'package:smart_explorer/explore_map.dart';
 import 'package:smart_explorer/settings.dart';
 import 'package:smart_explorer/profile.dart';
 
@@ -110,7 +109,7 @@ class MainPageState extends State<MainPage> {
         // }); //This is to get the first subject which is Econs
         print("Main: Successly retrieved explore map info!");
         Route route = MaterialPageRoute(
-            builder: (context) => SubjectMap(mapInfo: responseMap));
+            builder: (context) => ExploreMap(mapInfo: responseMap));
         Navigator.push(context, route);
       } else {
         print("Main: " + response.statusCode.toString());
@@ -438,9 +437,9 @@ class ExpandableCardState extends State<ExpandableCard>
               margin: EdgeInsets.only(top: iconPadding),
               height: iconWidth,
               width: iconWidth,
-              child: CircleAvatar(
-                backgroundImage: AssetImage('images/Econs.png'),
-                backgroundColor: Colors.transparent, 
+              child: Image.asset(
+                'images/test.png'
+                
               ),
             ) 
           )

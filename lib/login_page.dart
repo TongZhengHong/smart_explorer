@@ -60,7 +60,6 @@ class LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         print("Login: Retrieved page info!");
         final reponseArr = json.decode(response.body);
-        print(reponseArr);
 
         print("Login: SUCCESS");
         Route route = MaterialPageRoute(

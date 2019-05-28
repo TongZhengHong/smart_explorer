@@ -22,7 +22,10 @@ class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(fontFamily: "Rubik"),
+      theme: ThemeData(
+        fontFamily: "Rubik",
+        accentColor: global.blue
+      ),
       home: MyHome()
     );
   }
@@ -94,9 +97,16 @@ class MyHomeState extends State<MyHome> {
         print("Splash: Retrieved page info!");
         final responseArr = json.decode(response.body);
 
-        Route route = MaterialPageRoute(
-          builder: (context) => MainPage(loginInfo: responseArr["subjects"]));
-        Navigator.pushReplacement(context, route);
+        if (responseArr.isEmpty) {
+          print("Splash: No data available from server, directing to login page...");
+          Route route = MaterialPageRoute(builder: (context) => LoginPage());
+          Navigator.pushReplacement(_context, route); //Direct back to login page
+        } else {
+          Route route = MaterialPageRoute(
+            builder: (context) => MainPage(loginInfo: responseArr["subjects"]));
+          Navigator.pushReplacement(context, route);
+        }
+
       } else if (response.statusCode == 401){
         print("Splash: Authorisation error: Directing to login page...");
 
