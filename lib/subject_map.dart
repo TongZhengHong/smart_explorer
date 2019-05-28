@@ -294,8 +294,25 @@ class ActivityDialog extends StatefulWidget {
 
 class ActivityDialogState extends State<ActivityDialog> {
   bool _loading = false;
+  var curData;
 
   void getPageData(int position, int id, int cNum) async {
+    final String url = "https://tinypingu.infocommsociety.com/api/get-activity-attempt";
+    print("$id");
+    await http.post(url,
+        headers: {"Cookie": global.cookie, "Content-Type": "application/json"},
+        body: json.encode({"activityId": id})).then((dynamic response) {
+      if (response.statusCode == 200) {
+        final responseArr = json.decode(response.body);
+        int attCnt = responseArr.length;
+        curData = responseArr[attCnt-1]["data"];
+        print("Get Attempt: Success!");
+        print(curData);
+        //dataGot = true;
+      } else {
+        print("Get Attempt: Error! Attempt data not retrieved!");
+      }
+    });
     final String mapUrl =
         "https://tinypingu.infocommsociety.com/api/getactivity";
     await http.post(mapUrl,
@@ -306,10 +323,10 @@ class ActivityDialogState extends State<ActivityDialog> {
         var actPages = responseArr["pages"];
         var act = responseArr;
         print("Activity: Success!");
-
+        print(responseArr);
         Route route = MaterialPageRoute(
             builder: (context) =>
-                ActivityPage(widget.posInChap[widget.position], act, actPages, "Testing"));
+                ActivityPage(widget.posInChap[widget.position], act, actPages, curData, "Testing"));
         Navigator.pushReplacement(context, route);
       } else {
         print("Activity: Error! Page data not retrieved!");
