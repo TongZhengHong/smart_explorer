@@ -304,8 +304,8 @@ class ActivityDialogState extends State<ActivityDialog> {
         body: json.encode({"activityId": id})).then((dynamic response) {
       if (response.statusCode == 200) {
         final responseArr = json.decode(response.body);
-        int attCnt = responseArr.length;
-        curData = responseArr[attCnt-1]["data"];
+        // int attCnt = responseArr.length;
+        curData = responseArr["data"];
         print("Get Attempt: Success!");
         print(curData);
         //dataGot = true;
