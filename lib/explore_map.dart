@@ -505,8 +505,25 @@ class ActivityDialog extends StatefulWidget {
 
 class ActivityDialogState extends State<ActivityDialog> {
   bool _loading = false;
+  var curData;
 
   void getPageData(int position, int id, String title) async {
+    final String url = "https://tinypingu.infocommsociety.com/api/get-activity-attempt";
+    print("$id");
+    await http.post(url,
+        headers: {"Cookie": global.cookie, "Content-Type": "application/json"},
+        body: json.encode({"activityId": id})).then((dynamic response) {
+      if (response.statusCode == 200) {
+        final responseArr = json.decode(response.body);
+        int attCnt = responseArr.length;
+        curData = responseArr[attCnt-1]["data"];
+        print("Get Attempt: Success!");
+        print(curData);
+        //dataGot = true;
+      } else {
+        print("Get Attempt: Error! Attempt data not retrieved!");
+      }
+    });
     final String mapUrl =
         "https://tinypingu.infocommsociety.com/api/getactivity";
     await http.post(mapUrl,
@@ -520,8 +537,7 @@ class ActivityDialogState extends State<ActivityDialog> {
 
         print(widget.position);
         Route route = MaterialPageRoute(
-            builder: (context) => ActivityPage(
-                _chptPos[widget.position~/2], act, actPages, title));
+            builder: (context) => ActivityPage(_chptPos[widget.position~/2], act, actPages, curData, title));
         Navigator.pushReplacement(context, route);
       } else {
         print("Explore Map: Error! Page data not retrieved!");
@@ -726,9 +742,9 @@ class ExplorePainter extends CustomPainter {
             ..pushStyle(textStyle)
             ..addText(_chapterDesc[i]);
           var paragraph = paragraphBuilder.build()
-            ..layout(ui.ParagraphConstraints(width: size.width));
+            ..layout(ui.ParagraphConstraints(width: size.width * 0.7));
 
-          canvas.drawParagraph(paragraph, Offset(0.0, textDy));
+          canvas.drawParagraph(paragraph, Offset(size.width * 0.15, textDy));
         }
       }
     }
