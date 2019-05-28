@@ -136,10 +136,10 @@ class ActivityPageState extends State<ActivityPage> {
       color.add(tempCol);
       _pressed.add(false);
       qNumber = quesNum[j].toString();
+      if (qNumber.length == 1) qNumber = "0" + qNumber;
       String tempQ = "Question " + qNumber + ":";
       question.add(tempQ);
     }
-
 
     //! Set the options which the user has already chosen
     for (int i = 0; i < pageData.length; i++){
@@ -246,7 +246,6 @@ class ActivityPageState extends State<ActivityPage> {
   }
 
   void _remove() async {
-    print("Hello!");
     for (int i = 0; i < optCnt[position]+1; i++){
       if (optCnt[position] == 0) break;
       await Future.delayed(const Duration(milliseconds: 70), () => "1");
@@ -268,7 +267,6 @@ class ActivityPageState extends State<ActivityPage> {
   }
 
   void _insert() async{
-    print("Goodbye!");
     for (int i = 0; i < optCnt[position]+1; i++) {
       // if (!stable) break;
       await Future.delayed(const Duration(milliseconds: 70), () => "1");
@@ -305,7 +303,7 @@ class ActivityPageState extends State<ActivityPage> {
                           painter: CurvePainter(),
                         ),
                         Positioned(
-                          top: global.phoneHeight * 0.35 + global.phoneWidth * 0.12,
+                          top: global.phoneHeight * 0.35 + global.phoneWidth * 0.12 + 6.0,
                           left: global.phoneWidth * 0.12,
                           child: Material(
                             elevation: 2.0,
@@ -434,7 +432,7 @@ class ActivityPageState extends State<ActivityPage> {
                           )
                         ),
                         Positioned(
-                          top: global.phoneHeight * 0.10 + global.phoneWidth * 0.12,
+                          top: global.phoneHeight * 0.10 + global.phoneWidth * 0.12 + 6.0,
                           left: global.phoneWidth * 0.07,
                           child: Padding(
                             padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, global.phoneHeight * 0.05),
@@ -459,33 +457,90 @@ class ActivityPageState extends State<ActivityPage> {
                                 child: Material(
                                   borderRadius: BorderRadius.circular(8.0),
                                   elevation: 2.0,
-                                  child: SingleChildScrollView(   
-                                    child: Padding(
-                                      padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.05, 0.0, global.phoneWidth * 0.05, 0.0),
-                                      child: Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
-                                            child: Text(
-                                              question[position],
-                                              style: TextStyle(
-                                                fontFamily: "PoppinsSemiBold",
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFFFAAD32),
-                                              ),
-                                            ),
+                                  child: Stack(
+                                    children: <Widget> [
+                                      Positioned(
+                                        top: 30.0,
+                                        child: Container(
+                                          height: global.phoneHeight * 0.25 - 30.0,
+                                          width: global.phoneWidth * 0.86,
+                                          child: ScrollConfiguration(
+                                            behavior: MyBehavior(),
+                                            child: ListView(   
+                                              shrinkWrap: true,
+                                              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                                              children: <Widget> [
+                                                Padding(
+                                                  padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.05, 0.0, global.phoneWidth * 0.05, 0.0),
+                                                  child: Html(
+                                                    data: pageData[position]["text"],
+                                                    defaultTextStyle: TextStyle(
+                                                      fontFamily: "PoppinsSemiBold",
+                                                      fontSize: 14.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]
+                                            )
+                                          )
+                                        )
+                                      ),
+                                      Positioned(
+                                        left: global.phoneWidth * 0.08,
+                                        top: global.phoneHeight * 0.25,
+                                        child: Container(
+                                          height: 6.0,
+                                          width: global.phoneWidth * 0.70, 
+                                          decoration: BoxDecoration(
+                                            color: global.backgroundWhite,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 6.0,
+                                                color: global.backgroundWhite,
+                                                offset: Offset(0.0, 2.0),
+                                                spreadRadius: 24.0
+                                              )
+                                            ]
                                           ),
-                                          Html(
-                                            data: pageData[position]["text"],
-                                            defaultTextStyle: TextStyle(
+                                        ),
+                                      ),
+                                      Positioned(
+                                        left: global.phoneWidth * 0.06,
+                                        top: 20.0,
+                                        child: Container(
+                                          height: 6.0,
+                                          width: global.phoneWidth * 0.74, 
+                                          decoration: BoxDecoration(
+                                            color: global.backgroundWhite,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 6.0,
+                                                color: global.backgroundWhite,
+                                                offset: Offset(0.0, 2.0),
+                                                spreadRadius: 12.0
+                                              )
+                                            ]
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        color: Colors.transparent,
+                                        height: 32.0,
+                                        width: global.phoneWidth * 0.86, 
+                                        child: Center(
+                                          child: Text(
+                                            question[position],
+                                            style: TextStyle(
                                               fontFamily: "PoppinsSemiBold",
                                               fontSize: 14.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFFFAAD32),
                                             ),
-                                          ),
-                                        ]
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ),
                                       ),
-                                    ),
+                                    ]
                                   )
                                 ),
                               )
@@ -514,141 +569,144 @@ class ActivityPageState extends State<ActivityPage> {
                     decoration: BoxDecoration(
                       color: global.backgroundWhite,
                     ),
-                    child: AnimatedList(
-                      key: _listKey,
-                      shrinkWrap: true,
-                      initialItemCount: 0,
-                      //physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
-                      itemBuilder: (BuildContext context, int pos, Animation animation) {
-                        if (pos < optCnt[position]){
-                          return FadeTransition(
-                            opacity: animation,
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.1, 0.0, global.phoneWidth * 0.1, 10.0),
-                              child: Material(
-                                borderRadius: BorderRadius.circular(8.0),
-                                elevation: 2.0,
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 300),
-                                  //height: global.phoneHeight * 0.09,
-                                  width: global.phoneWidth * 0.8,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: new Border.all(
-                                      color: color[position][pos],
-                                      width: borderWidth[position][pos],
-                                      style: borderStyle[position][pos],
-                                    ),
-                                  ),
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (!_pressed[position]){
-                                        setState(() {
-                                          _pressed[position] = true;
-                                          data[position]["answer"] = pos;
-                                          for (int i = 0; i < optCnt[position]; i++){
-                                            if (pageData[position]["options"][i]["correct"] == true){
-                                              if (i == pos){
-                                                data[position]["score"] = pageData[position]["maxScore"];
-                                              }
-                                              else data[position]["score"] = 0;
-                                              color[position][i] = Color(0xFF22C8AD);
-                                              borderWidth[position][i] = 2.0;
-                                              borderStyle[position][i] = BorderStyle.solid;
-                                            }
-                                          }
-                                          if (pageData[position]["options"][pos]["correct"] == false){
-                                            color[position][pos] = Colors.red;
-                                            borderWidth[position][pos] = 2.0;
-                                            borderStyle[position][pos] = BorderStyle.solid;
-                                          }
-                                          else {
-                                            score += pageData[position]["maxScore"];
-                                          }
-                                          // if (position != 2){
-                                          //   widget.switchPage(position+1);
-                                          // }
-                                          sendAttempt(data);
-                                          _opacity = 1.0;
-                                        });
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10.0),
-                                      child: Wrap(
-                                        children: <Widget> [
-                                          Center(
-                                            child: Text(
-                                              pageData[position]["options"][pos]["text"],
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontFamily: "PoppinsSemiBold",
-                                                fontSize: 14.0,
-                                              ),
-                                            ),
-                                          )
-                                        ]
+                    child: ScrollConfiguration(
+                      behavior: MyBehavior(),
+                      child: AnimatedList(
+                        key: _listKey,
+                        shrinkWrap: true,
+                        initialItemCount: 0,
+                        //physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
+                        itemBuilder: (BuildContext context, int pos, Animation animation) {
+                          if (pos < optCnt[position]){
+                            return FadeTransition(
+                              opacity: animation,
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.1, 0.0, global.phoneWidth * 0.1, 10.0),
+                                child: Material(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  elevation: 2.0,
+                                  child: AnimatedContainer(
+                                    duration: Duration(milliseconds: 300),
+                                    //height: global.phoneHeight * 0.09,
+                                    width: global.phoneWidth * 0.8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: new Border.all(
+                                        color: color[position][pos],
+                                        width: borderWidth[position][pos],
+                                        style: borderStyle[position][pos],
                                       ),
                                     ),
-                                  ),
-                                )
-                              ),
-                            )
-                          );
-                        }
-                        else if (position != 0){
-                          return Padding(
-                              padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.08, global.phoneHeight * 0.01, global.phoneWidth * 0.08, global.phoneHeight * 0.01),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  FlatButton(
-                                    onPressed: (){
-                                      if (stable){
-                                        stable = false;
-                                        futurePos -= 1;
-                                        changePage(-1);
-                                      }
-                                    },
-                                    child: Container(
-                                      child: Row(
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.chevron_left,
-                                            color: Color(0x40000000),
-                                          ),
-                                          Text(
-                                            "Previous",
-                                            style: TextStyle(
-                                              fontFamily: "PoppinsSemiBold",
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0x40000000),
-                                            ),
-                                          )
-                                        ],
+                                    child: InkWell(
+                                      onTap: () {
+                                        if (!_pressed[position]){
+                                          setState(() {
+                                            _pressed[position] = true;
+                                            data[position]["answer"] = pos;
+                                            for (int i = 0; i < optCnt[position]; i++){
+                                              if (pageData[position]["options"][i]["correct"] == true){
+                                                if (i == pos){
+                                                  data[position]["score"] = pageData[position]["maxScore"];
+                                                }
+                                                else data[position]["score"] = 0;
+                                                color[position][i] = Color(0xFF22C8AD);
+                                                borderWidth[position][i] = 2.0;
+                                                borderStyle[position][i] = BorderStyle.solid;
+                                              }
+                                            }
+                                            if (pageData[position]["options"][pos]["correct"] == false){
+                                              color[position][pos] = Colors.red;
+                                              borderWidth[position][pos] = 2.0;
+                                              borderStyle[position][pos] = BorderStyle.solid;
+                                            }
+                                            else {
+                                              score += pageData[position]["maxScore"];
+                                            }
+                                            // if (position != 2){
+                                            //   widget.switchPage(position+1);
+                                            // }
+                                            sendAttempt(data);
+                                            _opacity = 1.0;
+                                          });
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.all(10.0),
+                                        child: Wrap(
+                                          children: <Widget> [
+                                            Center(
+                                              child: Text(
+                                                pageData[position]["options"][pos]["text"],
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: "PoppinsSemiBold",
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                            )
+                                          ]
+                                        ),
                                       ),
                                     ),
                                   )
-                                ],
-                              ),
-                          );
-                        }
-                        else {
-                          return Padding(
-                              padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.08, global.phoneHeight * 0.01, global.phoneWidth * 0.08, global.phoneHeight * 0.01),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text("")
-                                ],
-                              ),
-                          );
-                        }
-                      },
-                    )
+                                ),
+                              )
+                            );
+                          }
+                          else if (position != 0){
+                            return Padding(
+                                padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.08, global.phoneHeight * 0.01, global.phoneWidth * 0.08, global.phoneHeight * 0.01),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    FlatButton(
+                                      onPressed: (){
+                                        if (stable){
+                                          stable = false;
+                                          futurePos -= 1;
+                                          changePage(-1);
+                                        }
+                                      },
+                                      child: Container(
+                                        child: Row(
+                                          children: <Widget>[
+                                            Icon(
+                                              Icons.chevron_left,
+                                              color: Color(0x40000000),
+                                            ),
+                                            Text(
+                                              "Previous",
+                                              style: TextStyle(
+                                                fontFamily: "PoppinsSemiBold",
+                                                fontSize: 14.0,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0x40000000),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                            );
+                          }
+                          else {
+                            return Padding(
+                                padding: EdgeInsets.fromLTRB(global.phoneWidth * 0.08, global.phoneHeight * 0.01, global.phoneWidth * 0.08, global.phoneHeight * 0.01),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text("")
+                                  ],
+                                ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
                   ),
                 )
               ],
@@ -658,6 +716,7 @@ class ActivityPageState extends State<ActivityPage> {
             duration: Duration(milliseconds: 300),
             opacity: _pressed[futurePos] ? 1.0 : 0.0,
             child: _pressed[position] || _pressed[futurePos] ? Container(
+              margin: EdgeInsets.only(right: global.phoneWidth * 0.05),
               height: global.phoneHeight * 0.07,
               width: global.phoneWidth * 0.25,
               decoration: BoxDecoration(
@@ -712,168 +771,62 @@ class ActivityPageState extends State<ActivityPage> {
     }
     else {
       return Scaffold(
-        body: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(
-                left: global.phoneWidth * 0.07,
-                top: global.phoneHeight * 0.07,
-                right: global.phoneHeight * 0.07
-              ),
-              child: Container(
-                width: global.phoneWidth * 0.86,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      height: global.phoneWidth * 0.12,
-                      width: global.phoneWidth * 0.12,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0)
-                      ),
-                      child: Material(
-                        borderRadius: BorderRadius.circular(8.0),
-                        elevation: 0.0,
-                        color: Color(0x25ffffff),
-                        child: InkWell(
-                          onTap: (){
-                            Navigator.pop(context);
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(0.0, 2.0, 0.0, 2.0),
-                            child: Center(
-                              child: Column(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                  ),
-                                  Text(
-                                    "exit",
-                                    style: TextStyle(
-                                      fontFamily: "PoppinsSemiBold",
-                                      fontSize: 9.0,
-                                      color: Colors.white,
-                                    )
-                                  )
-                                ],
-                              )
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    Container(
-                      // color: Colors.black,
-                      width: global.phoneWidth * 0.5,
-                      child: Center(
-                        child: Text(
-                          widget.chptName,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: "PoppinsSemiBold",
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            height: 0.9,
-                          )
-                        ),
-                      )
-                    ),
-                    Container(
-                      //duration: Duration(milliseconds: 500),
-                      height: global.phoneWidth * 0.12,
-                      width: global.phoneWidth * 0.12,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0)
-                      ),
-                      child: Material(
-                        borderRadius: BorderRadius.circular(8.0),
-                        elevation: 0.0,
-                        color: Color(0x25ffffff),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(0.0, 6.0, 0.0, 2.0),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                  "Score",
-                                  style: TextStyle(
-                                    fontFamily: "PoppinsSemiBold",
-                                    fontSize: 9.0,
-                                    color: Colors.white,
-                                  )
-                                ),
-                                Text(
-                                  score.toString(),
-                                  style: TextStyle(
-                                    fontFamily: "PoppinsSemiBold",
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  )
-                                )
-                              ],
-                            )
-                          )
-                        )
-                      )
-                    ),
-                  ],
-                ),
-              ),
-            ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    "You have reached the end of this activity! Click exit to return!",
+        floatingActionButton: Container(
+          margin:EdgeInsets.only(right: global.phoneWidth * 0.2 + 140),
+          height: global.phoneHeight * 0.06,
+          width: 140,
+          child: FlatButton(
+            onPressed: (){
+              if (stable){
+                stable = false;
+                futurePos -= 1;
+                changePage(-1);
+              }
+            },
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.chevron_left,
+                    color: Color(0x40000000),
+                  ),
+                  Text(
+                    "Previous",
                     style: TextStyle(
-                      fontSize: 14.0,
                       fontFamily: "PoppinsSemiBold",
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0x40000000),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                )
+                  )
+                ],
               ),
-            Container(
-              
-              child: FlatButton(
-                onPressed: (){
-                  if (stable){
-                    print("DEBUG: Activated!");
-                    stable = false;
-                    futurePos -= 1;
-                    changePage(-1);
-                  }
-                },
-                child: Container(
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.chevron_left,
-                        color: Color(0x40000000),
-                      ),
-                      Text(
-                        "Previous",
-                        style: TextStyle(
-                          fontFamily: "PoppinsSemiBold",
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0x40000000),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              )
             )
-          ]
-        )
+          )
+        ),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text("hello"),
+              Container(
+                width: global.phoneWidth * 0.80,
+                child: Text(
+                  "You have reached the end of this activity! Click exit to return!",
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "PoppinsSemiBold",
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ), 
+            ],
+          )
+        ),
       );
     }
   }
-
-  // 
 }
 
 class CurvePainter extends CustomPainter {
@@ -904,4 +857,12 @@ Path drawCurvedRect(double dy){
   path.lineTo(global.phoneWidth, 0);
   path.close();
   return path;
+}
+
+class MyBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
 }
