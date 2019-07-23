@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:smart_explorer/explore_map.dart';
 import 'package:smart_explorer/main.dart';
 
-int subindex = 0;
 int chapindex = 0;
 int score = 0;
 List<String> subjects = ["H2 Economics", "H2 Math", "H2 Chemistry", "H2 Physics"];
@@ -27,14 +26,15 @@ String auth_details = "AuthDetails";  //Includes studentID, Name and Email
 double phoneHeight = 0.0;
 double phoneWidth = 0.0;
 double statusBarHeight = 0.0;
-double navBarHeight = 200;
-double bottomAppBarHeight = 56.0;
+double appBarHeight = 56.0;
+double extendedAppBarHeight = 64.0;
 
 //! Colours:
 Color blue = const Color(0xFF78B2FA);
 Color appBarLightBlue = const Color(0xFFCDD6F0);
 Color backgroundWhite = const Color(0xFFF6F8FC);
 Color darkBlue = const Color(0xFF1B417C);
+Color amber = const Color(0xFFFAAD32);
 
 LinearGradient blueGradient = LinearGradient(
   colors: [Color(0xFF78B5FA), Color(0xFF7DA2FF)]
@@ -81,6 +81,24 @@ Gradient pinkDiagonalGradient = LinearGradient(
   end: FractionalOffset.topRight,
   colors: [Color(0xFFED4264), Color(0xFFff9472)]
 );
+
+var elevationShadow2 = [
+  BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 1.0, spreadRadius: -2.0, color: Color(0x33000000)),
+  BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 2.0, spreadRadius: 0.0, color: Color(0x24000000)),
+  BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 5.0, spreadRadius: 0.0, color: Color(0x1F000000)),  
+];
+
+var elevationShadow4 = [
+  BoxShadow(offset: Offset(0.0, 2.0), blurRadius: 4.0, spreadRadius: -1.0, color: Color(0x33000000)),
+  BoxShadow(offset: Offset(0.0, 4.0), blurRadius: 5.0, spreadRadius: 0.0, color: Color(0x24000000)),
+  BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 10.0, spreadRadius: 0.0, color: Color(0x1F000000)), 
+];
+
+var elevationShadow8 = [
+  BoxShadow(offset: Offset(0.0, 5.0), blurRadius: 5.0, spreadRadius: -3.0, color: Color(0x33000000)),
+  BoxShadow(offset: Offset(0.0, 8.0), blurRadius: 10.0, spreadRadius: 1.0, color: Color(0x24000000)),
+  BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 14.0, spreadRadius: 2.0, color: Color(0x1F000000)),
+];
 
 Widget createGradientButton(LinearGradient gradient, double height, double width, BuildContext context, Widget route, String content){
   return Container(
@@ -213,10 +231,10 @@ int randomRange(int n1, int n2, int seed) {
 }
 
 //Part to copy from the source code.
-const Duration _kUnconfirmedSplashDuration = const Duration(milliseconds: 2000);
-const Duration _kSplashFadeDuration = const Duration(milliseconds: 400);
+const Duration _kUnconfirmedSplashDuration = const Duration(milliseconds: 500);
+const Duration _kSplashFadeDuration = const Duration(milliseconds: 500);
 
-const double _kSplashInitialSize = 0.0; // logical pixels
+const double _kSplashInitialSize = 0.1; // logical pixels
 const double _kSplashConfirmedVelocity = 0.2;
 
 class CustomSplashFactory extends InteractiveInkFeatureFactory {

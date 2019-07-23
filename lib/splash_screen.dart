@@ -89,7 +89,7 @@ class MyHomeState extends State<MyHome> {
       return;
     }
 
-    print("Splash: " + global.cookie);
+    print("Splash: " + (global.cookie == "" ? "NO cookie" : global.cookie));
     String url = 'https://tinypingu.infocommsociety.com/api/studentinfo';
     await http.post(url, headers: {"cookie": global.cookie}).then(
         (dynamic response) async {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as Math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_explorer/internet.dart';
@@ -112,11 +113,6 @@ class LoginPageState extends State<LoginPage> {
         global.studentName = responseMap["Name"];
         global.studentEmail = responseMap["Email"];
 
-        List<String> info = [
-          global.studentID,
-          global.studentName,
-          global.studentEmail
-        ];
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         // await prefs.setStringList("AuthDetails", info);
@@ -270,13 +266,13 @@ class LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(4.0),
           boxShadow: [
             BoxShadow(
-                color: Colors.grey, blurRadius: 8.0, offset: Offset(2.0, 2.0)),
+                color: Colors.grey, blurRadius: 4.0, offset: Offset(1.0, 2.0)),
           ],
         ),
         width: global.phoneWidth - 64.0, //Minus the padding of 32.0px on both sides
         height: 56.0,
         child: Material(
-          color: Colors.transparent,
+          type: MaterialType.transparency,
           child: InkWell(
             borderRadius: BorderRadius.circular(4.0),
             onTap: () {
@@ -296,28 +292,26 @@ class LoginPageState extends State<LoginPage> {
               }
             },
             child: Center(
-              child: Center(
-                child: !loading
-                    ? Text(
-                        "SIGN IN",
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          fontFamily: "PoppinsSemiBold",
-                          color: Colors.white,
-                        ),
-                      )
-                    : SizedBox(
-                        height: global.phoneHeight * 0.03,
-                        width: global.phoneHeight * 0.03,
-                        child: Theme(
-                          data: Theme.of(context)
-                              .copyWith(accentColor: Colors.white),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3.0,
-                          ),
+              child: !loading
+                  ? Text(
+                      "SIGN IN",
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        fontFamily: "PoppinsSemiBold",
+                        color: Colors.white,
+                      ),
+                    )
+                  : SizedBox(
+                      height: global.phoneHeight * 0.03,
+                      width: global.phoneHeight * 0.03,
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(accentColor: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3.0,
                         ),
                       ),
-              ),
+                    ),
             ),
           ),
         ));
@@ -326,46 +320,62 @@ class LoginPageState extends State<LoginPage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: global.backgroundWhite,
-      body: SingleChildScrollView(
-          child: Container(
-        width: global.phoneWidth,
-        height: global.phoneHeight,
-        child: Stack(
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                CustomPaint(
-                  size: Size(global.phoneWidth, global.phoneHeight * 0.4),
-                  painter: LoginPainter(),
-                ),
-                SizedBox(
-                  height: 64.0,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32.0),
-                  child: usernameTextField,
-                ),
-                SizedBox(
-                  height: 28.0,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32.0),
-                  child: passwordTextField,
-                ),
-              ],
-            ),
-            Positioned(
-              bottom: global.phoneHeight*0.1,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32.0),
-                child: loginButton,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: ScrollConfiguration(
+          behavior: MyBehavior(),
+          child: SingleChildScrollView(
+            child: Container(
+              width: global.phoneWidth,
+              height: global.phoneHeight,
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      CustomPaint(
+                        size: Size(global.phoneWidth, global.phoneHeight * 0.45),
+                        painter: LoginPainter(),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Container(),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 32.0),
+                        child: usernameTextField,
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 32.0),
+                        child: passwordTextField,
+                      ),
+                      Expanded(
+                        flex: 5,
+                        child: Container(),
+                      ),
+                      Container(
+                        height: global.phoneHeight * 0.1 + 56.0,
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: global.phoneHeight*0.1,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 32.0),
+                      child: loginButton,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            )
+          ),
         ),
-      )),
+      ),
     );
   }
 }
@@ -587,4 +597,12 @@ Path drawQuadCircles(double x, double y){
   path.addArc(circle, 0, 2*Math.pi);
 
   return path;
+}
+
+class MyBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
 }

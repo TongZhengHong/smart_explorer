@@ -1,36 +1,43 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_explorer/global.dart' as global;
-import 'package:smart_explorer/activity.dart';
+import 'package:smart_explorer/info.dart';
+import 'package:smart_explorer/mcq.dart';
 import 'package:path_drawing/path_drawing.dart';
 
+import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-List _activities = [];
+import 'internet.dart';
+
+ConnectionStatusSingleton connectionStatus;
+
+List _activities = [];                //? Data info for each activity  (like title and descriptions)
 List _chptPos = [];
-List _scores = [];
-List _types = [];
+List _scores = [];                    //? List of scores for each activity to show stars
+List _types = [];                     //? Show if activity is Homework, Info, MCQ
 
-Map<int, String> _chapterDesc = {};
-List<double> _activityPositions = [];
+Map<int, String> _chapterDesc = {};   //? List of chapter descriptions
+List<double> _activityPositions = []; //? List of LEFT padding for each activity circle/button
 
-const _circleDiameter = 48.0;
-const _activitySpacing = 200;
-const _endMargin = 120.0;
+const _circleDiameter = 48.0; //? Size of each activity circle
+const _activitySpacing = 200; //? Spacing between 2 activities
+const _endMargin = 120.0;     //? Spacing at the top and bottoms of explore map
 const _extraStarHeight = 24.0; //? For stars on top
 const _extraStarWidth = 40.0; //? For stars at the side
 double _activitySideMargin = global.phoneWidth * 0.1 + _extraStarWidth;
-
-double _extraVerticalStarHeight = 12.0;
+const _extraVerticalStarHeight = 12.0;
 
 class ExploreMap extends StatefulWidget {
+  final int scrollToPosition;
   final dynamic mapInfo;
 
-  ExploreMap({Key key, @required this.mapInfo}) : super(key: key);
+  ExploreMap({Key key, @required this.mapInfo, this.scrollToPosition : 0}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -43,11 +50,16 @@ class ExploreMapState extends State<ExploreMap> {
   bool _loading = false;
 
   Random _random = Random(500);
+  ScrollController scrollController;
 
   @override
   void initState() {
     super.initState();
+    connectionStatus = ConnectionStatusSingleton.getInstance();
 
+    scrollController = ScrollController();
+
+    //Initialise all list to be empty
     _activities = [];
     _chptPos = [];
     _scores = [];
@@ -55,10 +67,13 @@ class ExploreMapState extends State<ExploreMap> {
 
     _chapterDesc = {};
     _activityPositions = [];
+    double scrollPosDist = _endMargin - _activitySpacing + _circleDiameter; //Just a tad bit upwards
 
     //! Populate information into chptPos and activities arrays
-    widget.mapInfo["children"].forEach((chapter) {
+    for (int i = 0; i < widget.mapInfo["children"].length; i++) {
+      var chapter = widget.mapInfo["children"][i];
       int cnt = 0;
+
       _chapterDesc[itemCnt * 2] = chapter["dsc"];
       itemCnt += chapter["children"].length;
       chapter["children"].forEach((activity) {
@@ -69,8 +84,9 @@ class ExploreMapState extends State<ExploreMap> {
         _activities.add(null); //?This is to signify the line b/w 2 points/activity
         _chptPos.add(cnt);
         cnt++;
+        if (i < widget.scrollToPosition) scrollPosDist += _circleDiameter + _activitySpacing;
       });
-    });
+    }
     itemCnt = itemCnt * 2 - 1; //Account for separators in b/w 2 points
     _activities.removeLast();
 
@@ -100,6 +116,13 @@ class ExploreMapState extends State<ExploreMap> {
         _activityPositions.add(-1);
       }
     }
+    //? croll to the chapter after build is complete
+    if (widget.scrollToPosition != 0) SchedulerBinding.instance.addPostFrameCallback((_) => scrollToChapter(scrollPosDist));
+  }
+
+  void scrollToChapter(double position) async{
+    await Future.delayed(const Duration(milliseconds: 300));
+    scrollController.animateTo(position, duration: Duration(milliseconds: 1000), curve: Curves.ease);
   }
 
   @override
@@ -108,6 +131,8 @@ class ExploreMapState extends State<ExploreMap> {
         _circleDiameter * ((_activityPositions.length + 1) ~/ 2) +
         _endMargin * 2; //this is for both the last and first items
 
+
+    //! Populate the list needed for the singlechildscrollview
     Widget painter = CustomPaint(
       size: Size(global.phoneWidth, totalHeight),
       painter: ExplorePainter(),
@@ -136,56 +161,60 @@ class ExploreMapState extends State<ExploreMap> {
 
     return Scaffold(
       backgroundColor: global.backgroundWhite,
-      body: Stack(children: <Widget>[
-        SingleChildScrollView(
-          reverse: true,
-          child: Stack(children: exploreMapWidgets),
-        ),
-        Container( //!Appbar here
-            width: global.phoneWidth,
-            height: global.bottomAppBarHeight + global.statusBarHeight,
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  decoration:
-                      BoxDecoration(color: global.backgroundWhite, boxShadow: [
-                    BoxShadow(
-                        blurRadius: 12.0,
-                        color: global.backgroundWhite,
-                        offset: Offset(0.0, 12.0),
-                        spreadRadius: 4.0)
-                  ]),
-                ),
-                Positioned(
-                  top: global.statusBarHeight +
-                      global.bottomAppBarHeight / 2 -
-                      14,
-                  left: 64,
-                  child: Text(
-                    widget.mapInfo["name"],
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: "CarterOne",
-                        fontSize: 22.0),
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark,
+        child: Stack(children: <Widget>[
+          SingleChildScrollView(
+            controller: scrollController,
+            reverse: true,
+            child: Stack(children: exploreMapWidgets),
+          ),
+          Container( //!Appbar here
+              width: global.phoneWidth,
+              height: global.appBarHeight + global.statusBarHeight,
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    decoration:
+                        BoxDecoration(color: global.backgroundWhite, boxShadow: [
+                      BoxShadow(
+                          blurRadius: 8.0,
+                          color: global.backgroundWhite,
+                          offset: Offset(0.0, 4.0),
+                          spreadRadius: 8.0)
+                    ]),
                   ),
-                ),
-                Positioned(
-                  top: global.statusBarHeight + 6,
-                  child: Container(
-                    margin: EdgeInsets.only(left: 5.0),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        splashFactory: global.CustomSplashFactory(),
-                        borderRadius: BorderRadius.circular(2.0),
-                        child: BackButton(color: Colors.black),
+                  Positioned(
+                    top: global.statusBarHeight +
+                        global.appBarHeight / 2 -
+                        14,
+                    left: 56.0,
+                    child: Text(
+                      widget.mapInfo["name"],
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: "CarterOne",
+                          fontSize: 22.0),
+                    ),
+                  ),
+                  Positioned(
+                    top: global.statusBarHeight + 6,
+                    child: Container(
+                      margin: EdgeInsets.only(left: 5.0),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          splashFactory: global.CustomSplashFactory(),
+                          borderRadius: BorderRadius.circular(2.0),
+                          child: BackButton(color: Colors.black),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            )),
-      ]),
+                ],
+              )),
+        ]),
+      ),
     );
   }
 
@@ -458,10 +487,11 @@ class ExploreMapState extends State<ExploreMap> {
                                   ),
                                 ),
                               ),
-                            ))),
+                            )
+                          )
+                        ),
                       ),
                     )
-                    
                   ],
           );
   }
@@ -505,39 +535,82 @@ class ActivityDialog extends StatefulWidget {
 
 class ActivityDialogState extends State<ActivityDialog> {
   bool _loading = false;
-  var curData;
+  var userData;
+
+  void _showDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(content),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("OKAY"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void getPageData(int position, int id, String title) async {
+    if (!await connectionStatus.checkConnection()) { //If not connected!
+      print("MCQ submit: Not connected!");
+      _showDialog("Oh no!",
+          "Something went wrong! Please check your Internet connection!");
+      setState(() {
+        _loading = false;
+      });
+      return;
+    }
+
     final String url = "https://tinypingu.infocommsociety.com/api/get-activity-attempt";
-    print("$id");
+    print("Explore map: Activity ID: $id");
     await http.post(url,
         headers: {"Cookie": global.cookie, "Content-Type": "application/json"},
         body: json.encode({"activityId": id})).then((dynamic response) {
       if (response.statusCode == 200) {
         final responseArr = json.decode(response.body);
-        // int attCnt = responseArr.length;
-        curData = responseArr["data"];
-        print("Get Attempt: Success!");
-        print(curData);
-        //dataGot = true;
+        
+        userData = responseArr["data"];
+        print("Explore Map: Get attempt success!");
+        print(userData);
       } else {
         print("Get Attempt: Error! Attempt data not retrieved!");
       }
     });
-    final String mapUrl =
-        "https://tinypingu.infocommsociety.com/api/getactivity";
+
+    final String mapUrl = "https://tinypingu.infocommsociety.com/api/getactivity";
     await http.post(mapUrl,
         headers: {"Cookie": global.cookie},
         body: {"id": id.toString()}).then((dynamic response) {
       if (response.statusCode == 200) {
         final responseArr = json.decode(response.body);
-        var actPages = responseArr["pages"];
-        var act = responseArr;
-        print("Explore Map: Success!");
+        var pages = responseArr["pages"];
+        print("Explore Map: Get activity success!");
 
-        print(widget.position);
         Route route = MaterialPageRoute(
-            builder: (context) => ActivityPage(_chptPos[widget.position~/2], act, actPages, curData, title));
+            builder: (context) => (responseArr["type"] == "test") 
+            ? McqPage(
+                actId: responseArr["id"],
+                title: title, 
+                pageData: pages,
+                userData: userData,
+                maxScore: responseArr["maxScore"],
+              )
+            : InfoPage(
+              actId: responseArr["id"],
+              title: title,
+              pageData: pages,
+            )
+          );
         Navigator.pushReplacement(context, route);
       } else {
         print("Explore Map: Error! Page data not retrieved!");
@@ -648,7 +721,6 @@ class ActivityDialogState extends State<ActivityDialog> {
 }
 
 class ExplorePainter extends CustomPainter {
-
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint();
